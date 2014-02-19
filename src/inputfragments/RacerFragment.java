@@ -1,13 +1,21 @@
 package inputfragments;
 
 import hu.gyerob.trakiapp.R;
-import network.DeleteDrag;
-import network.DeleteRacer;
-import network.DeleteSlalom;
-import network.DeleteTrailer;
-import network.PostRacer;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jsonParser.JSONParser;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,17 +23,21 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import application.App;
-import data.Drag;
-import data.Racer;
-import data.Slalom;
-import data.Trailer;
-import datastorage.DbLoader;
 
 public class RacerFragment extends Fragment {
 	public static final String TITLE = "Versenyzõk";
+	// url to create new product
+	private static String url_create_product = "http://192.168.0.101/trakiweb/create_product.php";
 
-	private DbLoader dbLoader;
+	// JSON Node names
+	// private static final String TAG_SUCCESS = "success";
+
+	// Progress Dialog
+	private ProgressDialog pDialog;
+
+	JSONParser jsonParser = new JSONParser();
+
+	// private DbLoader dbLoader;
 
 	private Button save;
 	private EditText name;
@@ -58,79 +70,95 @@ public class RacerFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		dbLoader = App.getDbLoader();
+		// dbLoader = App.getDbLoader();
 	}
 
 	OnClickListener click = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			Racer r = new Racer();
 
-			r.setName(name.getText().toString());
-			int racernumber;
-			if (number.getText().toString().equals("")) {
-				racernumber = 0;
-			} else
-				racernumber = Integer.parseInt(number.getText().toString());
-			r.setNumber(racernumber);
-			r.setTown(town.getText().toString());
-			r.setSex(sex.isChecked());
-			r.setTrailer(trailer.isChecked());
-			r.setSlalom(slalom.isChecked());
-			r.setDrag(drag.isChecked());
-
-			if (!trailer.isChecked() && !slalom.isChecked()
-					&& !drag.isChecked()) {
-				dbLoader.deleteRacer(r);
-				DeleteRacer dr = new DeleteRacer(racernumber);
-				dr.execute();
-			} else {
-				dbLoader.inputRacer(r);
-
-				PostRacer pr = new PostRacer(racernumber);
-				pr.execute();
-
-				Trailer t = new Trailer(name.getText().toString(), racernumber,
-						99, 99, 999, 99);
-				Slalom s = new Slalom(name.getText().toString(), racernumber,
-						99, 99, 999, 99);
-				Drag d = new Drag(name.getText().toString(), racernumber, 99,
-						99, 999, 999);
-
-				if (trailer.isChecked()) {
-					dbLoader.inputTrailer(t);
-
-				} else {
-					dbLoader.deleteTrailer(t);
-					DeleteTrailer dt = new DeleteTrailer(racernumber);
-					dt.execute();
-				}
-
-				if (slalom.isChecked()) {
-					dbLoader.inputSlalom(s);
-				} else {
-					dbLoader.deleteSlalom(s);
-					DeleteSlalom ds = new DeleteSlalom(racernumber);
-					ds.execute();
-				}
-
-				if (drag.isChecked()) {
-					dbLoader.inputDrag(d, true);
-				} else {
-					dbLoader.deleteDrag(d);
-					DeleteDrag dd = new DeleteDrag(racernumber);
-					dd.execute();
-				}
-			}
-			name.setText("");
-			number.setText("");
-			town.setText("");
-			
-			sex.setChecked(false);
-			trailer.setChecked(false);
-			slalom.setChecked(false);
-			drag.setChecked(false);
+			new CreateNewRacer().execute();
 		}
 	};
+
+	/**
+	 * Background Async Task to Create new product
+	 * */
+	class CreateNewRacer extends AsyncTask<String, String, String> {
+
+		/**
+		 * Before starting background thread Show Progress Dialog
+		 * */
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(RacerFragment.this.getActivity());
+			pDialog.setMessage("Versenyzõ eltárolása..");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
+
+		/**
+		 * Creating product
+		 * */
+		protected String doInBackground(String... args) {
+			String nev = name.getText().toString();
+			String rajt = number.getText().toString();
+			String varos = town.getText().toString();
+			String nem, potk, szlalom, gyors;
+			if (sex.isChecked())
+				nem = "true";
+			else
+				nem = "false";
+			if (trailer.isChecked())
+				potk = "true";
+			else
+				potk = "false";
+			if (slalom.isChecked())
+				szlalom = "true";
+			else
+				szlalom = "false";
+			if (drag.isChecked())
+				gyors = "true";
+			else
+				gyors = "false";
+
+			// Building Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("name", nev));
+			params.add(new BasicNameValuePair("number", rajt));
+			params.add(new BasicNameValuePair("town", varos));
+			params.add(new BasicNameValuePair("sex", nem));
+			params.add(new BasicNameValuePair("trailer", potk));
+			params.add(new BasicNameValuePair("slalom", szlalom));
+			params.add(new BasicNameValuePair("drag", gyors));
+
+			// getting JSON Object
+			// Note that create product url accepts POST method
+			JSONObject json = jsonParser.makeHttpRequest(url_create_product,
+					"POST", params);
+
+			// check log cat fro response
+			Log.d("Create Response", json.toString());
+
+			return null;
+		}
+
+		/**
+		 * After completing background task Dismiss the progress dialog
+		 * **/
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once done
+			pDialog.dismiss();
+			/*
+			 * name.setText(""); number.setText(""); town.setText("");
+			 * 
+			 * sex.setChecked(false); trailer.setChecked(false);
+			 * slalom.setChecked(false); drag.setChecked(false);
+			 */
+		}
+
+	}
 }
