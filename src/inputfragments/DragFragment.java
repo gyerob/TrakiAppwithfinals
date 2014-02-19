@@ -1,7 +1,18 @@
 package inputfragments;
 
 import hu.gyerob.trakiapp.R;
-import network.PostDrag;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jsonParser.JSONParser;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,14 +23,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import application.App;
-import data.Drag;
-import datastorage.DbLoader;
 
 public class DragFragment extends Fragment {
 	public static final String TITLE = "Gyorsulás";
 
-	private DbLoader dbLoader;
+	// url to create new product
+	private static String url_update_drag = "http://192.168.0.101/trakiweb/update_drag.php";
+
+	// Progress Dialog
+	private ProgressDialog pDialog;
+
+	JSONParser jsonParser = new JSONParser();
 
 	private Button save;
 	private EditText number;
@@ -46,64 +60,74 @@ public class DragFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		dbLoader = App.getDbLoader();
 	}
 
 	OnClickListener click = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			Drag d = new Drag();
-			int rajt, mperc, mmp;
 
-			if (number.getText().toString().equals(""))
-				rajt = 0;
-			else
-				rajt = Integer.parseInt(number.getText().toString());
-
-			if (mp.getText().toString().equals(""))
-				mperc = 0;
-			else
-				mperc = Integer.parseInt(mp.getText().toString());
-
-			if (ms.getText().toString().equals(""))
-				mmp = 0;
-			else
-				mmp = Integer.parseInt(ms.getText().toString());
-
-			d.setNumber(rajt);
-			
-			String msecond = ms.getText().toString();
-			Log.d("ezredms", msecond + "hossza:" + msecond.length());
-			String tort;
-			if (msecond.length() == 2) {
-				tort = "Század";
-			}
-			else if (msecond.length() == 3){
-				tort = "Ezred";
-			}
-			else{
-				tort = "Tized";
-			}
-			
-			if (firstround.isChecked()) {
-				d.setMP1(mperc);
-				d.setMS1(mmp);
-				d.setTort1(tort);
-				d.setTort2(tort);
-			} else {
-				d.setMP2(mperc);
-				d.setMS2(mmp);
-				d.setTort1(tort);
-				d.setTort2(tort);
-			}
-			
-			d.setTimes();
-
-			dbLoader.inputDrag(d,firstround.isChecked());
-
-			PostDrag pd = new PostDrag(d.getNumber());
-			pd.execute();
+			new UpdateDrag().execute();
 		}
 	};
+
+	class UpdateDrag extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(DragFragment.this.getActivity());
+			pDialog.setMessage("Versenyzõ eltárolása..");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
+
+		/**
+		 * Creating product
+		 * */
+		protected String doInBackground(String... args) {
+			String rajt = number.getText().toString();
+			String time = "harr";
+
+			int mperc, kor;
+			String mmp;
+			
+			if(firstround.isChecked()) kor = 1;
+			else kor = 2;
+			
+			mperc = Integer.parseInt(mp.getText().toString());
+			mmp = ms.getText().toString();
+
+			if (mperc < 10)
+				time = "0" + mperc + ":" + mmp;
+			else
+				time = mperc + ":" + mmp;
+			Log.d("ido", time);
+
+			// Building Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("rajt", rajt));
+			params.add(new BasicNameValuePair("ido", time));
+			params.add(new BasicNameValuePair("round", Integer.toString(kor)));
+
+			// getting JSON Object
+			// Note that create product url accepts POST method
+			JSONObject json = jsonParser.makeHttpRequest(url_update_drag,
+					"POST", params);
+
+			// check log cat fro response
+			Log.d("Create Response", json.toString());
+
+			return null;
+		}
+
+		/**
+		 * After completing background task Dismiss the progress dialog
+		 * **/
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once done
+			pDialog.dismiss();
+		}
+	}
 }

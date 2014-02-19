@@ -25,19 +25,16 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 public class RacerFragment extends Fragment {
-	public static final String TITLE = "Versenyzõk";
-	// url to create new product
-	private static String url_create_product = "http://192.168.0.101/trakiweb/create_product.php";
 
-	// JSON Node names
-	// private static final String TAG_SUCCESS = "success";
+	public static final String TITLE = "Versenyzõk";
+
+	// url to create new product
+	private static String url_create_product = "http://192.168.0.101/trakiweb/create_racer.php";
 
 	// Progress Dialog
 	private ProgressDialog pDialog;
 
 	JSONParser jsonParser = new JSONParser();
-
-	// private DbLoader dbLoader;
 
 	private Button save;
 	private EditText name;
@@ -70,7 +67,6 @@ public class RacerFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// dbLoader = App.getDbLoader();
 	}
 
 	OnClickListener click = new OnClickListener() {
@@ -82,14 +78,8 @@ public class RacerFragment extends Fragment {
 		}
 	};
 
-	/**
-	 * Background Async Task to Create new product
-	 * */
 	class CreateNewRacer extends AsyncTask<String, String, String> {
 
-		/**
-		 * Before starting background thread Show Progress Dialog
-		 * */
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -152,13 +142,14 @@ public class RacerFragment extends Fragment {
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog once done
 			pDialog.dismiss();
-			/*
-			 * name.setText(""); number.setText(""); town.setText("");
-			 * 
-			 * sex.setChecked(false); trailer.setChecked(false);
-			 * slalom.setChecked(false); drag.setChecked(false);
-			 */
-		}
 
+			name.setText("");
+			number.setText("");
+			town.setText("");
+			sex.setChecked(false);
+			trailer.setChecked(false);
+			slalom.setChecked(false);
+			drag.setChecked(false);
+		}
 	}
 }

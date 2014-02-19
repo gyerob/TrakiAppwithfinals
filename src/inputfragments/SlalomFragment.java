@@ -1,7 +1,18 @@
 package inputfragments;
 
-import network.PostSlalom;
 import hu.gyerob.trakiapp.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jsonParser.JSONParser;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,14 +22,17 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import application.App;
-import data.Slalom;
-import datastorage.DbLoader;
 
 public class SlalomFragment extends Fragment {
 	public static final String TITLE = "Szlalom";
 
-	private DbLoader dbLoader;
+	// url to create new product
+	private static String url_update_slalom = "http://192.168.0.101/trakiweb/update_slalom.php";
+
+	// Progress Dialog
+	private ProgressDialog pDialog;
+
+	JSONParser jsonParser = new JSONParser();
 
 	private Button save;
 	private EditText number;
@@ -48,69 +62,82 @@ public class SlalomFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		dbLoader = App.getDbLoader();
 	}
 
 	OnClickListener click = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			Slalom s = new Slalom();
-			int rajt, perc, mperc, mmp, h;
 
-			if (number.getText().toString().equals(""))
-				rajt = 0;
-			else
-				rajt = Integer.parseInt(number.getText().toString());
-
-			if (p.getText().toString().equals(""))
-				perc = 0;
-			else
-				perc = Integer.parseInt(p.getText().toString());
-
-			if (mp.getText().toString().equals(""))
-				mperc = 0;
-			else
-				mperc = Integer.parseInt(mp.getText().toString());
-
-			if (ms.getText().toString().equals(""))
-				mmp = 0;
-			else
-				mmp = Integer.parseInt(ms.getText().toString());
-
-			if (hiba.getText().toString().equals(""))
-				h = 0;
-			else
-				h = Integer.parseInt(hiba.getText().toString());
-
-			
-			String msecond = ms.getText().toString();
-			Log.d("ezredms", msecond + "hossza:" + msecond.length());
-			String tort;
-			if (msecond.length() == 2) {
-				tort = "Század";
-			}
-			else if (msecond.length() == 3){
-				tort = "Ezred";
-			}
-			else{
-				tort = "Tized";
-			}
-			
-			s.setNumber(rajt);
-			s.setP(perc);
-			s.setMP(mperc);
-			s.setMS(mmp);
-			s.setHiba(h);
-			s.setTort(tort);
-			
-			s.setTimes();
-
-			dbLoader.inputSlalom(s);
-			dbLoader.updateFinalsSlalom();
-
-			PostSlalom ps = new PostSlalom(s.getNumber());
-			ps.execute();
+			new UpdateSlalom().execute();
 		}
 	};
+
+	class UpdateSlalom extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(SlalomFragment.this.getActivity());
+			pDialog.setMessage("Versenyzõ eltárolása..");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
+
+		/**
+		 * Creating product
+		 * */
+		protected String doInBackground(String... args) {
+			String rajt = number.getText().toString();
+			String time = "harr";
+			String fault = hiba.getText().toString();
+			String finaltime = "harr";
+
+			int perc, mperc, h;
+			String mmp;
+			perc = Integer.parseInt(p.getText().toString());
+			mperc = Integer.parseInt(mp.getText().toString());
+			mmp = ms.getText().toString();
+			h = Integer.parseInt(hiba.getText().toString());
+
+			time = perc + ":" + mperc + ":" + mmp;
+
+			int ujmp = ((h * 5) + mperc);
+			while (ujmp > 59) {
+				ujmp -= 60;
+				perc++;
+			}
+			if (ujmp < 10)
+				finaltime = perc + ":0" + ujmp + ":" + mmp;
+			else
+				finaltime = perc + ":" + ujmp + ":" + mmp;
+			Log.d("ido", time);
+
+			// Building Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("rajt", rajt));
+			params.add(new BasicNameValuePair("ido", time));
+			params.add(new BasicNameValuePair("hiba", fault));
+			params.add(new BasicNameValuePair("vido", finaltime));
+
+			// getting JSON Object
+			// Note that create product url accepts POST method
+			JSONObject json = jsonParser.makeHttpRequest(url_update_slalom,
+					"POST", params);
+
+			// check log cat fro response
+			Log.d("Create Response", json.toString());
+
+			return null;
+		}
+
+		/**
+		 * After completing background task Dismiss the progress dialog
+		 * **/
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once done
+			pDialog.dismiss();
+		}
+	}
 }
