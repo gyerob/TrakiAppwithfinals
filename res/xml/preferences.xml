@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Personal" >
+        <EditTextPreference
+            android:name="IP"
+            android:defaultValue="gyerob.no-ip.biz"
+            android:key="editTextIP"
+            android:summary="Ide csatlakozik"
+            android:title="IP" />
+        
+        <EditTextPreference
+            android:name="Port"
+            android:defaultValue="8080"
+            android:key="editTextPort"
+            android:summary="Ezen a porton"
+            android:title="Port" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
