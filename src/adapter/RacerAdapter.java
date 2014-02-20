@@ -1,34 +1,50 @@
 package adapter;
 
 import hu.gyerob.trakiapp.R;
+
+import java.util.ArrayList;
+
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import data.Racer;
-import datastorage.DbLoader;
 
-public class RacerAdapter extends CursorAdapter {
-	Context context;
+public class RacerAdapter extends BaseAdapter {
+	ArrayList<Racer> racers;
 
-	public RacerAdapter(Context context, Cursor c) {
-		super(context, c, false);
-		this.context = context;
+	public RacerAdapter(final ArrayList<Racer> Racers) {
+		super();
+		this.racers = Racers;
+	}
+
+	@Override
+	public int getCount() {
+		return racers.size();
 	}
 
 	@Override
 	public Racer getItem(int position) {
-		getCursor().moveToPosition(position);
-		return DbLoader.getRacerByCursor(getCursor());
+		return racers.get(position);
 	}
 
 	@Override
-	public void bindView(View view, Context context, Cursor cursor) {
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		Racer racer = getItem(position);
+
+		LayoutInflater inflater = (LayoutInflater) parent.getContext()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View view = inflater.inflate(R.layout.row_racer, null);
+
 		TextView name = (TextView) view.findViewById(R.id.row_racerName);
 		TextView number = (TextView) view.findViewById(R.id.row_racerNumber);
 		CheckBox sex = (CheckBox) view.findViewById(R.id.row_racerSex);
@@ -36,12 +52,10 @@ public class RacerAdapter extends CursorAdapter {
 		CheckBox trailer = (CheckBox) view.findViewById(R.id.row_racerTrailer);
 		CheckBox slalom = (CheckBox) view.findViewById(R.id.row_racerSlalom);
 		CheckBox drag = (CheckBox) view.findViewById(R.id.row_racerDrag);
-		
+
 		name.setTextColor(Color.BLACK);
 		number.setTextColor(Color.BLACK);
 		town.setTextColor(Color.BLACK);
-
-		Racer racer = DbLoader.getRacerByCursor(cursor);
 
 		name.setText(racer.getName());
 		number.setText(Integer.toString(racer.getNumber()));
@@ -50,13 +64,7 @@ public class RacerAdapter extends CursorAdapter {
 		trailer.setChecked(racer.getTrailer());
 		slalom.setChecked(racer.getSlalom());
 		drag.setChecked(racer.getDrag());
-	}
 
-	@Override
-	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-		final LayoutInflater inflater = LayoutInflater.from(context);
-		View row = inflater.inflate(R.layout.row_racer, null);
-		bindView(row, context, cursor);
-		return row;
+		return view;
 	}
 }

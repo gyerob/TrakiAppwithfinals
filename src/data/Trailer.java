@@ -1,6 +1,5 @@
 package data;
 
-
 public class Trailer {
 	private String name;
 	private int number;
@@ -14,6 +13,14 @@ public class Trailer {
 	private String ido;
 	private String vido;
 	private String tort;
+
+	public void setIdo(String i) {
+		ido = i;
+	}
+
+	public void setVido(String i) {
+		vido = i;
+	}
 
 	public String getTort() {
 		return tort;

@@ -15,6 +15,14 @@ public class Slalom {
 	String vido;
 	private String tort;
 
+	public void setIdo(String i) {
+		ido = i;
+	}
+
+	public void setVido(String i) {
+		vido = i;
+	}
+	
 	public String getTort() {
 		return tort;
 	}

@@ -1,33 +1,49 @@
 package adapter;
 
 import hu.gyerob.trakiapp.R;
+
+import java.util.ArrayList;
+
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 import data.Slalom;
-import datastorage.DbLoader;
 
-public class SlalomAdapter extends CursorAdapter {
-	Context context;
+public class SlalomAdapter extends BaseAdapter {
+	ArrayList<Slalom> slaloms;
 
-	public SlalomAdapter(Context context, Cursor c) {
-		super(context, c, false);
-		this.context = context;
+	public SlalomAdapter(final ArrayList<Slalom> Slaloms) {
+		super();
+		slaloms = Slaloms;
 	}
 
 	@Override
 	public Slalom getItem(int position) {
-		getCursor().moveToPosition(position);
-		return DbLoader.getSlalomByCursor(getCursor());
+		return slaloms.get(position);
 	}
 
 	@Override
-	public void bindView(View view, Context context, Cursor cursor) {
+	public int getCount() {
+		return slaloms.size();
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		Slalom slalom = getItem(position);
+		
+		LayoutInflater inflater = (LayoutInflater) parent.getContext()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View view = inflater.inflate(R.layout.row_slalom, null);
+		
 		TextView name = (TextView) view.findViewById(R.id.row_slalomName);
 		TextView number = (TextView) view.findViewById(R.id.row_slalomNumber);
 		TextView ido = (TextView) view.findViewById(R.id.row_slalomIdo);
@@ -40,20 +56,12 @@ public class SlalomAdapter extends CursorAdapter {
 		hiba.setTextColor(Color.BLACK);
 		vido.setTextColor(Color.BLACK);
 
-		Slalom slalom = DbLoader.getSlalomByCursor(cursor);
-
 		name.setText(slalom.getName());
 		number.setText(Integer.toString(slalom.getNumber()));
 		ido.setText(slalom.getIdo());
 		hiba.setText(Integer.toString(slalom.getHiba()));
 		vido.setText(slalom.getVido());
-	}
-
-	@Override
-	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-		final LayoutInflater inflater = LayoutInflater.from(context);
-		View row = inflater.inflate(R.layout.row_slalom, null);
-		bindView(row, context, cursor);
-		return row;
+		
+		return view;
 	}
 }

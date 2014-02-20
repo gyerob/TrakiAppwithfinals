@@ -27,7 +27,7 @@
 
     <CheckBox
         android:id="@+id/row_racerSex"
-        android:layout_width="30dp"
+        android:layout_width="36dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
@@ -46,7 +46,7 @@
 
     <CheckBox
         android:id="@+id/row_racerTrailer"
-        android:layout_width="30dp"
+        android:layout_width="36dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
@@ -55,7 +55,7 @@
 
     <CheckBox
         android:id="@+id/row_racerSlalom"
-        android:layout_width="30dp"
+        android:layout_width="36dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
@@ -64,7 +64,7 @@
 
     <CheckBox
         android:id="@+id/row_racerDrag"
-        android:layout_width="30dp"
+        android:layout_width="36dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"

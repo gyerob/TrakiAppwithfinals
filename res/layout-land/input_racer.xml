@@ -111,12 +111,30 @@
         android:text="@string/data_sex" />
 
     <Button
+        android:id="@+id/inputracerbtnupdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/inputracerSex"
+        android:layout_marginLeft="24dp"
+        android:layout_toRightOf="@+id/inputracerSex"
+        android:text="@string/btn_update" />
+
+    <Button
         android:id="@+id/inputracerbtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/inputracerDrag"
         android:layout_below="@+id/inputracerEditTown"
-        android:layout_marginTop="37dp"
+        android:layout_marginTop="24dp"
+        android:layout_toRightOf="@+id/inputracerbtnupdate"
         android:text="@string/btn_save" />
+
+    <Button
+        android:id="@+id/inputracerbtndelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/inputracerbtn"
+        android:layout_alignBottom="@+id/inputracerbtn"
+        android:layout_alignLeft="@+id/inputracerDrag"
+        android:text="@string/btn_delete" />
 
 </RelativeLayout>

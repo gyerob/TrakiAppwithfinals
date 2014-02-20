@@ -19,6 +19,8 @@
     <string name="data_slalom">Szlalom</string>
     <string name="data_trailer">Pótkocsis</string>
     <string name="btn_save">Mentés</string>
+    <string name="btn_update">Frissítés</string>
+    <string name="btn_delete">Törlés</string>
     <string name="data_time">Idő</string>
     <string name="data_error">Hiba</string>
     <string name="data_round">1. Kör</string>

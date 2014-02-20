@@ -13,6 +13,18 @@ public class Drag {
 	String legjobb;
 	private String tort1, tort2;
 
+	public void setIdo1(String i) {
+		ido1 = i;
+	}
+
+	public void setIdo2(String i) {
+		ido2 = i;
+	}
+
+	public void setLido(String i) {
+		legjobb = i;
+	}
+
 	public String getTort1() {
 		return tort1;
 	}
@@ -20,7 +32,7 @@ public class Drag {
 	public void setTort1(String tort) {
 		this.tort1 = tort;
 	}
-	
+
 	public String getTort2() {
 		return tort2;
 	}
@@ -53,7 +65,7 @@ public class Drag {
 		MS2 = Integer.parseInt(temp2[1]);
 		tort1 = "Ezred";
 		tort2 = "Ezred";
-		
+
 		if (temp1[1].length() == 2) {
 			tort1 = "Század";
 		} else if (temp1[1].length() == 3) {
@@ -68,7 +80,7 @@ public class Drag {
 		} else {
 			tort2 = "Tized";
 		}
-		
+
 		setTimes();
 	}
 

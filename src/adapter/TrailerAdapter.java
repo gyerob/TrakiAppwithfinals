@@ -1,33 +1,49 @@
 package adapter;
 
 import hu.gyerob.trakiapp.R;
+
+import java.util.ArrayList;
+
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 import data.Trailer;
-import datastorage.DbLoader;
 
-public class TrailerAdapter extends CursorAdapter {
-	Context context;
+public class TrailerAdapter extends BaseAdapter {
+	ArrayList<Trailer> trailers;
 
-	public TrailerAdapter(Context context, Cursor c) {
-		super(context, c, false);
-		this.context = context;
+	public TrailerAdapter(final ArrayList<Trailer> Trailers) {
+		super();
+		this.trailers = Trailers;
 	}
 
 	@Override
 	public Trailer getItem(int position) {
-		getCursor().moveToPosition(position);
-		return DbLoader.getTrailerByCursor(getCursor());
+		return trailers.get(position);
 	}
 
 	@Override
-	public void bindView(View view, Context context, Cursor cursor) {
+	public int getCount() {
+		return trailers.size();
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		Trailer trailer = getItem(position);
+		
+		LayoutInflater inflater = (LayoutInflater) parent.getContext()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View view = inflater.inflate(R.layout.row_trailer, null);
+		
 		TextView name = (TextView) view.findViewById(R.id.row_trailerName);
 		TextView number = (TextView) view.findViewById(R.id.row_trailerNumber);
 		TextView ido = (TextView) view.findViewById(R.id.row_trailerIdo);
@@ -39,21 +55,13 @@ public class TrailerAdapter extends CursorAdapter {
 		ido.setTextColor(Color.BLACK);
 		hiba.setTextColor(Color.BLACK);
 		vido.setTextColor(Color.BLACK);
-		
-		Trailer trailer = DbLoader.getTrailerByCursor(cursor);
 
 		name.setText(trailer.getName());
 		number.setText(Integer.toString(trailer.getNumber()));
 		ido.setText(trailer.getIdo());
 		hiba.setText(Integer.toString(trailer.getHiba()));
 		vido.setText(trailer.getVido());
-	}
-
-	@Override
-	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-		final LayoutInflater inflater = LayoutInflater.from(context);
-		View row = inflater.inflate(R.layout.row_trailer, null);
-		bindView(row, context, cursor);
-		return row;
+		
+		return view;
 	}	
 }

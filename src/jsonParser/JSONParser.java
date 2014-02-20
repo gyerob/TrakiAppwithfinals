@@ -37,16 +37,18 @@ public class JSONParser {
 	public JSONObject makeHttpRequest(String url, String method,
 			List<NameValuePair> params) {
 
+		UrlEncodedFormEntity form;
 		// Making HTTP request
 		try {
 			
 			// check for request method
 			if(method == "POST"){
+				form = new UrlEncodedFormEntity(params, "utf-8");
 				// request method is POST
 				// defaultHttpClient
 				DefaultHttpClient httpClient = new DefaultHttpClient();
 				HttpPost httpPost = new HttpPost(url);
-				httpPost.setEntity(new UrlEncodedFormEntity(params));
+				httpPost.setEntity(new UrlEncodedFormEntity(params, "utf-8"));
 
 				HttpResponse httpResponse = httpClient.execute(httpPost);
 				HttpEntity httpEntity = httpResponse.getEntity();
@@ -75,7 +77,7 @@ public class JSONParser {
 
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					is, "iso-8859-1"), 8);
+					is, "iso-8859-1"), 10);
 			StringBuilder sb = new StringBuilder();
 			String line = null;
 			while ((line = reader.readLine()) != null) {
