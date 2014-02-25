@@ -48,4 +48,20 @@
         android:layout_alignParentRight="true"
         android:text="Lezajlott" />
 
+    <Button
+        android:id="@+id/btnlockslalom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="Szlalomzár" />
+
+    <Button
+        android:id="@+id/btnlockdrag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="Gyorsulászár" />
+
 </RelativeLayout>

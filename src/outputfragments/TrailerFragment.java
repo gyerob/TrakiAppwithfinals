@@ -17,18 +17,18 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import data.Trailer;
 
 public class TrailerFragment extends ListFragment {
 	public static final String TITLE = "Pótkocsis";
-	
+
 	private TrailerAdapter adapter;
 	ArrayList<Trailer> trailerList;
-	
+
 	public ProgressDialog pDialog;
 
 	JSONParser jParser = new JSONParser();
@@ -43,20 +43,22 @@ public class TrailerFragment extends ListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		trailerList = new ArrayList<Trailer>();
-		
+
 		new LoadAllTrailer().execute();
 	}
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.output_trailer, container, false);
 		return v;
 	}
-	
+
 	class LoadAllTrailer extends AsyncTask<String, String, String> {
+
+		boolean failed = false;
 
 		@Override
 		protected void onPreExecute() {
@@ -77,9 +79,6 @@ public class TrailerFragment extends ListFragment {
 			// getting JSON string from URL
 			JSONObject json = jParser.makeHttpRequest(url_all_trailer, "GET",
 					params);
-
-			// Check your log cat for JSON reponse
-			Log.d("All Racer: ", json.toString());
 
 			try {
 				// Checking for SUCCESS TAG
@@ -108,6 +107,9 @@ public class TrailerFragment extends ListFragment {
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
+			} catch (Exception e) {
+				failed = true;
+				e.printStackTrace();
 			}
 
 			return null;
@@ -116,9 +118,16 @@ public class TrailerFragment extends ListFragment {
 		protected void onPostExecute(String file_url) {
 
 			pDialog.dismiss();
-			
-			adapter = new TrailerAdapter(trailerList);
-			setListAdapter(adapter);
+
+			if (failed) {
+				Toast.makeText(
+						TrailerFragment.this.getActivity(),
+						"Sikertelen lekérés, ellenõrizd az internetkapcsolatot",
+						Toast.LENGTH_LONG).show();
+			} else {
+				adapter = new TrailerAdapter(trailerList);
+				setListAdapter(adapter);
+			}
 		}
 	}
 }

@@ -36,7 +36,6 @@ public class SlalomTop10Adapter extends CursorAdapter {
 		number.setTextColor(Color.BLACK);
 		
 		Finals f = DbLoader.getSlalomTop10ByCursor(cursor);
-		Log.d("finalslalom", f.getName() + " " + f.getWon());
 		pos.setText(Integer.toString(f.getWon()));
 		name.setText(f.getName());
 		number.setText(Integer.toString(f.getNumber()));

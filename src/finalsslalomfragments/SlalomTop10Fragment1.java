@@ -1,29 +1,52 @@
 package finalsslalomfragments;
 
 import hu.gyerob.trakiapp.R;
-import data.Finals;
-import datastorage.DbConstants;
-import datastorage.DbLoader;
-import android.database.Cursor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jsonParser.JSONParser;
+
+import org.apache.http.NameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.ProgressDialog;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import application.App;
+import android.widget.TextView;
+import android.widget.Toast;
+import data.SlalomTop;
 
 public class SlalomTop10Fragment1 extends Fragment {
 	public static final String TITLE = "Lépcsõk";
-	
-	private DbLoader dbLoader;
 
-	private boolean veg;
-	private boolean loading;
+	private static String url_get_slalom_top = "http://gyerob.no-ip.biz/trakiweb/get_all_slalom_top.php";
+	private static String url_update_slalom_top = "http://gyerob.no-ip.biz/trakiweb/update_slalom_top.php";
+
+	private static final String TAG_SUCCESS = "success";
+	private static final String TAG_PRODUCTS = "racers";
+
+	// Progress Dialog
+	private ProgressDialog pDialog;
+
+	private JSONParser jsonParser = new JSONParser();
+
+	private ArrayList<SlalomTop> slalomListr1;
+	private ArrayList<SlalomTop> slalomListr2;
+	private ArrayList<SlalomTop> slalomListr3;
+	private ArrayList<SlalomTop> slalomListr4;
+	private JSONArray racers = null;
 
 	private CheckBox chkr111;
 	private CheckBox chkr112;
@@ -93,23 +116,16 @@ public class SlalomTop10Fragment1 extends Fragment {
 	private TextView txtr43;
 	private TextView txtr44;
 
-	private Cursor c;
-	private Finals f;
-
-	public void setVeg(boolean veg) {
-		this.veg = veg;
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		dbLoader = App.getDbLoader();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.finalsslalomscrollv, container, false);
+		View v = inflater.inflate(R.layout.finalsslalomscrollv, container,
+				false);
 
 		txtr11 = (TextView) v.findViewById(R.id.slalomround1Text1);
 		txtr12 = (TextView) v.findViewById(R.id.slalomround1Text2);
@@ -134,7 +150,7 @@ public class SlalomTop10Fragment1 extends Fragment {
 		txtr42 = (TextView) v.findViewById(R.id.slalomround4Text2);
 		txtr43 = (TextView) v.findViewById(R.id.slalomround4Text3);
 		txtr44 = (TextView) v.findViewById(R.id.slalomround4Text4);
-		
+
 		txtr11.setTextColor(Color.BLACK);
 		txtr12.setTextColor(Color.BLACK);
 		txtr13.setTextColor(Color.BLACK);
@@ -271,1131 +287,136 @@ public class SlalomTop10Fragment1 extends Fragment {
 		chkr441.setOnCheckedChangeListener(click);
 		chkr442.setOnCheckedChangeListener(click);
 
-		Cursor c;
-
-		if (veg) {
-			loading = true;
-			if (App.isSlalomloaded()) {
-				setNames();
-			} else {
-				c = dbLoader.fetchAllSlalom();
-				int i = 0;
-				while (c.moveToNext()) {
-					i++;
-				}
-				if (i > 9) {
-					loadStartData();
-					App.setSlalomloaded(true);
-				}
-			}
-			loading = false;
-		}
+		slalomListr1 = new ArrayList<SlalomTop>();
+		slalomListr2 = new ArrayList<SlalomTop>();
+		slalomListr3 = new ArrayList<SlalomTop>();
+		slalomListr4 = new ArrayList<SlalomTop>();
+		new GetList().execute();
 
 		return v;
 	}
 
-	public void loadStartData() {
-		Finals f;
-		Cursor c;
-		c = dbLoader.fetchAllSlalom();
-
-		// 1.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound3(f, 2);
-		txtr32.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 2.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound3(f, 3);
-		txtr33.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 3.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 6);
-		txtr16.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 4.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 3);
-		txtr13.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 5.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 7);
-		txtr17.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 6.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 2);
-		txtr12.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 7.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 1);
-		txtr11.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 8.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 8);
-		txtr18.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 9.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 4);
-		txtr14.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-
-		// 10.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Slalom.Key_Rajtszam)), 0);
-		dbLoader.updateSlalomRound1(f, 5);
-		txtr15.setText(c.getString(c.getColumnIndex(DbConstants.Slalom.Key_Name)));
-	}
-
-	public void setNames() {
-		Cursor c;
-		Finals f;
-
-		/*
-		 * 
-		 * 1. kör
-		 */
-		c = dbLoader.fetchAllSlalomTop10R1();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr111.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr111.setChecked(true);
-			chkr112.setChecked(true);
-			chkr112.setClickable(true);
-		}
-		txtr11.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr121.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr121.setChecked(true);
-			chkr122.setChecked(true);
-			chkr122.setClickable(true);
-		}
-		txtr12.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr131.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr131.setChecked(true);
-			chkr132.setChecked(true);
-			chkr132.setClickable(true);
-		}
-		txtr13.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr141.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr141.setChecked(true);
-			chkr142.setChecked(true);
-			chkr142.setClickable(true);
-		}
-		txtr14.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr151.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr151.setChecked(true);
-			chkr152.setChecked(true);
-			chkr152.setClickable(true);
-		}
-		txtr15.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr161.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr161.setChecked(true);
-			chkr162.setChecked(true);
-			chkr162.setClickable(true);
-		}
-		txtr16.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr171.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr171.setChecked(true);
-			chkr172.setChecked(true);
-			chkr172.setClickable(true);
-		}
-		txtr17.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr181.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr181.setChecked(true);
-			chkr182.setChecked(true);
-			chkr182.setClickable(true);
-		}
-		txtr18.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-
-		/*
-		 * 
-		 * 2. kör
-		 */
-		c = dbLoader.fetchAllSlalomTop10R2();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr211.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr211.setChecked(true);
-			chkr212.setChecked(true);
-			chkr212.setClickable(true);
-		}
-		txtr21.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr221.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr221.setChecked(true);
-			chkr222.setChecked(true);
-			chkr222.setClickable(true);
-		}
-		txtr22.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr231.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr231.setChecked(true);
-			chkr232.setChecked(true);
-			chkr232.setClickable(true);
-		}
-		txtr23.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr241.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr241.setChecked(true);
-			chkr242.setChecked(true);
-			chkr242.setClickable(true);
-		}
-		txtr24.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		/*
-		 * 
-		 * 3. kör
-		 */
-		c = dbLoader.fetchAllSlalomTop10R3();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr311.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr311.setChecked(true);
-			chkr312.setChecked(true);
-			chkr312.setClickable(true);
-		}
-		txtr31.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr321.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr321.setChecked(true);
-			chkr322.setChecked(true);
-			chkr322.setClickable(true);
-		}
-		txtr32.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr331.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr331.setChecked(true);
-			chkr332.setChecked(true);
-			chkr332.setClickable(true);
-		}
-		txtr33.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr341.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr341.setChecked(true);
-			chkr342.setChecked(true);
-			chkr342.setClickable(true);
-		}
-		txtr34.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		/*
-		 * 
-		 * 4. kör
-		 */
-		c = dbLoader.fetchAllSlalomTop10R4();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr411.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr411.setChecked(true);
-			chkr412.setChecked(true);
-			chkr412.setClickable(true);
-		}
-		txtr41.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr421.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr421.setChecked(true);
-			chkr422.setChecked(true);
-			chkr422.setClickable(true);
-		}
-		txtr42.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr431.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr431.setChecked(true);
-			chkr432.setChecked(true);
-			chkr432.setClickable(true);
-		}
-		txtr43.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.SlalomTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr441.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr441.setChecked(true);
-			chkr442.setChecked(true);
-			chkr442.setClickable(true);
-		}
-		txtr44.setText(c.getString(c
-				.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)));
-	}
-
 	private OnCheckedChangeListener click = new OnCheckedChangeListener() {
+
 		@Override
-		public void onCheckedChanged(CompoundButton v, boolean isChecked) {
-			int win1, win2;
-
-			if (v.isChecked()) {
-				win1 = 1;
-				win2 = 2;
-			} else {
-				win1 = 0;
-				win2 = 1;
-			}
-			if (!loading) {
-				switch (v.getId()) {
-				case R.id.slalomround1chk11: {
-					c = dbLoader.fetchSlalomTop10(1, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr112.setClickable(!chkr112.isClickable());
-					dbLoader.updateSlalomRound1(f, 1);
-					break;
-				}
-				case R.id.slalomround1chk21: {
-					c = dbLoader.fetchSlalomTop10(1, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr122.setClickable(!chkr122.isClickable());
-					dbLoader.updateSlalomRound1(f, 2);
-					break;
-				}
-				case R.id.slalomround1chk31: {
-					c = dbLoader.fetchSlalomTop10(1, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr132.setClickable(!chkr132.isClickable());
-					dbLoader.updateSlalomRound1(f, 3);
-					break;
-				}
-				case R.id.slalomround1chk41: {
-					c = dbLoader.fetchSlalomTop10(1, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr142.setClickable(!chkr142.isClickable());
-					dbLoader.updateSlalomRound1(f, 4);
-					break;
-				}
-				case R.id.slalomround1chk51: {
-					c = dbLoader.fetchSlalomTop10(1, 5);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr152.setClickable(!chkr152.isClickable());
-					dbLoader.updateSlalomRound1(f, 5);
-					break;
-				}
-				case R.id.slalomround1chk61: {
-					c = dbLoader.fetchSlalomTop10(1, 6);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr162.setClickable(!chkr162.isClickable());
-					dbLoader.updateSlalomRound1(f, 6);
-					break;
-				}
-				case R.id.slalomround1chk71: {
-					c = dbLoader.fetchSlalomTop10(1, 7);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr172.setClickable(!chkr172.isClickable());
-					dbLoader.updateSlalomRound1(f, 7);
-					break;
-				}
-				case R.id.slalomround1chk81: {
-					c = dbLoader.fetchSlalomTop10(1, 8);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr182.setClickable(!chkr182.isClickable());
-					dbLoader.updateSlalomRound1(f, 8);
-					break;
-				}
-
-				case R.id.slalomround1chk12: {
-					c = dbLoader.fetchSlalomTop10(1, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr21.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 1);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 1);
-					break;
-				}
-				case R.id.slalomround1chk22: {
-					c = dbLoader.fetchSlalomTop10(1, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr21.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 2);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 1);
-					break;
-				}
-				case R.id.slalomround1chk32: {
-					c = dbLoader.fetchSlalomTop10(1, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr22.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 3);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 2);
-					break;
-				}
-				case R.id.slalomround1chk42: {
-					c = dbLoader.fetchSlalomTop10(1, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr22.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 4);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 2);
-					break;
-				}
-				case R.id.slalomround1chk52: {
-					c = dbLoader.fetchSlalomTop10(1, 5);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr23.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 5);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 3);
-					break;
-				}
-				case R.id.slalomround1chk62: {
-					c = dbLoader.fetchSlalomTop10(1, 6);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr23.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 6);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 3);
-					break;
-				}
-				case R.id.slalomround1chk72: {
-					c = dbLoader.fetchSlalomTop10(1, 7);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr24.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 7);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 4);
-					break;
-				}
-				case R.id.slalomround1chk82: {
-					c = dbLoader.fetchSlalomTop10(1, 8);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr24.setText(f.getName());
-					dbLoader.updateSlalomRound1(f, 8);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound2(f, 4);
-					break;
-				}
-				case R.id.slalomround2chk11: {
-					c = dbLoader.fetchSlalomTop10(2, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr212.setClickable(!chkr212.isClickable());
-					dbLoader.updateSlalomRound2(f, 1);
-					break;
-				}
-				case R.id.slalomround2chk21: {
-					c = dbLoader.fetchSlalomTop10(2, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr222.setClickable(!chkr222.isClickable());
-					dbLoader.updateSlalomRound2(f, 2);
-					break;
-				}
-				case R.id.slalomround2chk31: {
-					c = dbLoader.fetchSlalomTop10(2, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr232.setClickable(!chkr232.isClickable());
-					dbLoader.updateSlalomRound2(f, 3);
-					break;
-				}
-				case R.id.slalomround2chk41: {
-					c = dbLoader.fetchSlalomTop10(2, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-					chkr242.setClickable(!chkr242.isClickable());
-					dbLoader.updateSlalomRound2(f, 4);
-					break;
-				}
-
-				case R.id.slalomround2chk12: {
-					c = dbLoader.fetchSlalomTop10(2, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateSlalomRound2(f, 1);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound3(f, 1);
-
-					txtr31.setText(f.getName());
-					break;
-				}
-				case R.id.slalomround2chk22: {
-					c = dbLoader.fetchSlalomTop10(2, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateSlalomRound2(f, 2);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound3(f, 1);
-
-					txtr31.setText(f.getName());
-					break;
-				}
-				case R.id.slalomround2chk32: {
-					c = dbLoader.fetchSlalomTop10(2, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateSlalomRound2(f, 3);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound3(f, 4);
-
-					txtr34.setText(f.getName());
-					break;
-				}
-				case R.id.slalomround2chk42: {
-					c = dbLoader.fetchSlalomTop10(2, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateSlalomRound2(f, 4);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound3(f, 4);
-
-					txtr34.setText(f.getName());
-					break;
-				}
-				case R.id.slalomround3chk11: {
-					c = dbLoader.fetchSlalomTop10(3, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr312.setClickable(!chkr312.isClickable());
-					dbLoader.updateSlalomRound3(f, 1);
-					break;
-				}
-				case R.id.slalomround3chk21: {
-					c = dbLoader.fetchSlalomTop10(3, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr322.setClickable(!chkr322.isClickable());
-					dbLoader.updateSlalomRound3(f, 2);
-					break;
-				}
-				case R.id.slalomround3chk31: {
-					c = dbLoader.fetchSlalomTop10(3, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr332.setClickable(!chkr332.isClickable());
-					dbLoader.updateSlalomRound3(f, 3);
-					break;
-				}
-				case R.id.slalomround3chk41: {
-					c = dbLoader.fetchSlalomTop10(3, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr342.setClickable(!chkr342.isClickable());
-					dbLoader.updateSlalomRound3(f, 4);
-					break;
-				}
-				case R.id.slalomround3chk12: {
-					c = dbLoader.fetchSlalomTop10(3, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr41.setText(f.getName());
-					dbLoader.updateSlalomRound3(f, 1);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound4(f, 1);
-
-					c = dbLoader.fetchSlalomTop10(3, 2);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateSlalomRound4(f, 3);
-					txtr43.setText(txtr32.getText());
-					break;
-				}
-				case R.id.slalomround3chk22: {
-					c = dbLoader.fetchSlalomTop10(3, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr41.setText(f.getName());
-					dbLoader.updateSlalomRound3(f, 2);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound4(f, 1);
-
-					c = dbLoader.fetchSlalomTop10(3, 1);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateSlalomRound4(f, 3);
-					txtr43.setText(txtr31.getText());
-					break;
-				}
-				case R.id.slalomround3chk32: {
-					c = dbLoader.fetchSlalomTop10(3, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr42.setText(f.getName());
-					dbLoader.updateSlalomRound3(f, 3);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound4(f, 2);
-
-					c = dbLoader.fetchSlalomTop10(3, 4);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateSlalomRound4(f, 4);
-					txtr44.setText(txtr34.getText());
-					break;
-				}
-				case R.id.slalomround3chk42: {
-					c = dbLoader.fetchSlalomTop10(3, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-					txtr42.setText(f.getName());
-					dbLoader.updateSlalomRound3(f, 4);
-
-					f.setWon(0);
-					dbLoader.updateSlalomRound4(f, 2);
-
-					c = dbLoader.fetchSlalomTop10(3, 3);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateSlalomRound4(f, 4);
-					txtr44.setText(txtr33.getText());
-					break;
-				}
-
-				case R.id.slalomround4chk11: {
-					c = dbLoader.fetchSlalomTop10(4, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr412.setClickable(!chkr412.isClickable());
-					dbLoader.updateSlalomRound4(f, 1);
-					break;
-				}
-				case R.id.slalomround4chk21: {
-					c = dbLoader.fetchSlalomTop10(4, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr422.setClickable(!chkr422.isClickable());
-					dbLoader.updateSlalomRound4(f, 2);
-					break;
-				}
-				case R.id.slalomround4chk31: {
-					c = dbLoader.fetchSlalomTop10(4, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr432.setClickable(!chkr432.isClickable());
-					dbLoader.updateSlalomRound4(f, 3);
-					break;
-				}
-				case R.id.slalomround4chk41: {
-					c = dbLoader.fetchSlalomTop10(4, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win1);
-
-					chkr442.setClickable(!chkr442.isClickable());
-					dbLoader.updateSlalomRound4(f, 4);
-					break;
-				}
-				case R.id.slalomround4chk12: {
-					c = dbLoader.fetchSlalomTop10(4, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateSlalomRound4(f, 1);
-					break;
-				}
-				case R.id.slalomround4chk22: {
-					c = dbLoader.fetchSlalomTop10(4, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateSlalomRound4(f, 2);
-					break;
-				}
-				case R.id.slalomround4chk32: {
-					c = dbLoader.fetchSlalomTop10(4, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateSlalomRound4(f, 3);
-					break;
-				}
-				case R.id.slalomround4chk42: {
-					c = dbLoader.fetchSlalomTop10(4, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.SlalomTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateSlalomRound4(f, 4);
-					break;
-				}
-
-				}
-			}
+		public void onCheckedChanged(CompoundButton buttonView,
+				boolean isChecked) {
+			// TODO Auto-generated method stub
 
 		}
 	};
+
+	class UpdateList extends AsyncTask<String, String, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+	}
+
+	class GetList extends AsyncTask<String, String, String> {
+
+		boolean failed = false;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(
+					SlalomTop10Fragment1.this.getActivity());
+			pDialog.setMessage("Versenyzõ frissítése..");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... param) {
+			// Building Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			// getting JSON string from URL
+			JSONObject json = jsonParser.makeHttpRequest(url_get_slalom_top,
+					"GET", params);
+
+			try {
+				// Checking for SUCCESS TAG
+				int success = json.getInt(TAG_SUCCESS);
+
+				if (success == 1) {
+					// products found
+					// Getting Array of Products
+					racers = json.getJSONArray(TAG_PRODUCTS);
+
+					Log.d("racers hossza:", Integer.toString(racers.length()));
+					// looping through All Products
+					for (int i = 0; i < racers.length(); i++) {
+						JSONObject c = racers.getJSONObject(i);
+
+						SlalomTop racer = new SlalomTop();
+
+						// Storing each json item in variable
+						racer.setNumber(c.getInt("rajt"));
+						racer.setName(c.getString("nev"));
+						racer.setWon(c.getInt("nyert"));
+
+						if (i < 8)
+							slalomListr1.add(racer);
+						else if (i < 12)
+							slalomListr2.add(racer);
+						else if (i < 16)
+							slalomListr3.add(racer);
+						else if (i < 20)
+							slalomListr4.add(racer);
+					}
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				failed = true;
+				e.printStackTrace();
+			}
+
+			return null;
+		}
+
+		protected void onPostExecute(String file_url) {
+
+			pDialog.dismiss();
+
+			if (failed) {
+				Toast.makeText(
+						SlalomTop10Fragment1.this.getActivity(),
+						"Sikertelen lekérés, ellenõrizd az internetkapcsolatot",
+						Toast.LENGTH_LONG).show();
+			} else {
+				txtr11.setText(slalomListr1.get(4).getName());
+				txtr12.setText(slalomListr1.get(3).getName());
+				txtr13.setText(slalomListr1.get(1).getName());
+				txtr14.setText(slalomListr1.get(6).getName());
+				txtr15.setText(slalomListr1.get(7).getName());
+				txtr16.setText(slalomListr1.get(0).getName());
+				txtr17.setText(slalomListr1.get(2).getName());
+				txtr18.setText(slalomListr1.get(5).getName());
+				
+				txtr21.setText(slalomListr2.get(0).getName());
+				txtr22.setText(slalomListr2.get(1).getName());
+				txtr23.setText(slalomListr2.get(2).getName());
+				txtr24.setText(slalomListr2.get(3).getName());
+				
+				txtr31.setText(slalomListr3.get(0).getName());
+				txtr32.setText(slalomListr3.get(1).getName());
+				txtr33.setText(slalomListr3.get(2).getName());
+				txtr34.setText(slalomListr3.get(3).getName());
+				
+				txtr41.setText(slalomListr4.get(0).getName());
+				txtr42.setText(slalomListr4.get(1).getName());
+				txtr43.setText(slalomListr4.get(2).getName());
+				txtr44.setText(slalomListr4.get(3).getName());
+
+				// adapter = new RacerAdapter(racerList);
+				// setListAdapter(adapter);
+			}
+		}
+	}
 }

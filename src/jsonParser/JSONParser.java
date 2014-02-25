@@ -40,10 +40,9 @@ public class JSONParser {
 		UrlEncodedFormEntity form;
 		// Making HTTP request
 		try {
-			
+
 			// check for request method
-			if(method == "POST"){
-				form = new UrlEncodedFormEntity(params, "utf-8");
+			if (method == "POST") {
 				// request method is POST
 				// defaultHttpClient
 				DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -53,8 +52,8 @@ public class JSONParser {
 				HttpResponse httpResponse = httpClient.execute(httpPost);
 				HttpEntity httpEntity = httpResponse.getEntity();
 				is = httpEntity.getContent();
-				
-			}else if(method == "GET"){
+
+			} else if (method == "GET") {
 				// request method is GET
 				DefaultHttpClient httpClient = new DefaultHttpClient();
 				String paramString = URLEncodedUtils.format(params, "utf-8");
@@ -64,8 +63,7 @@ public class JSONParser {
 				HttpResponse httpResponse = httpClient.execute(httpGet);
 				HttpEntity httpEntity = httpResponse.getEntity();
 				is = httpEntity.getContent();
-			}			
-			
+			}
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

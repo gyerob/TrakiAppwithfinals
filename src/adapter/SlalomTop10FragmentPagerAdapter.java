@@ -14,7 +14,6 @@ public class SlalomTop10FragmentPagerAdapter extends FragmentPagerAdapter {
 	public SlalomTop10FragmentPagerAdapter(FragmentManager fm ,boolean veg) {
 		super(fm);
 		f1 = new SlalomTop10Fragment1();
-		f1.setVeg(veg);
 		f2 = new SlalomTop10Fragment2();
 	}
 

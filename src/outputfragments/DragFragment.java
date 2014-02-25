@@ -17,10 +17,10 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import data.Drag;
 
 public class DragFragment extends ListFragment {
@@ -58,6 +58,8 @@ public class DragFragment extends ListFragment {
 
 	class LoadAllDrag extends AsyncTask<String, String, String> {
 
+		boolean failed = false;
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -77,9 +79,6 @@ public class DragFragment extends ListFragment {
 			// getting JSON string from URL
 			JSONObject json = jParser.makeHttpRequest(url_all_drag, "GET",
 					params);
-
-			// Check your log cat for JSON reponse
-			Log.d("All Racer: ", json.toString());
 
 			try {
 				// Checking for SUCCESS TAG
@@ -108,6 +107,9 @@ public class DragFragment extends ListFragment {
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
+			} catch (Exception e) {
+				failed = true;
+				e.printStackTrace();
 			}
 
 			return null;
@@ -117,8 +119,14 @@ public class DragFragment extends ListFragment {
 
 			pDialog.dismiss();
 
+			if (failed) {
+				Toast.makeText(
+						DragFragment.this.getActivity(),
+						"Sikertelen lekérés, ellenõrizd az internetkapcsolatot",
+						Toast.LENGTH_LONG).show();
+			} else {
 			adapter = new DragAdapter(dragList);
-			setListAdapter(adapter);
+			setListAdapter(adapter);}
 		}
 	}
 }

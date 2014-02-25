@@ -1,8 +1,6 @@
 package data;
 
-public class Racer {
-	String name;
-	int number;
+public class Racer extends People{
 	String town;
 	boolean sex;
 	boolean trailer;
@@ -24,14 +22,6 @@ public class Racer {
 		drag = Boolean.parseBoolean(d);
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public int getNumber() {
-		return number;
-	}
-
 	public boolean getSex() {
 		return sex;
 	}
@@ -50,14 +40,6 @@ public class Racer {
 
 	public boolean getDrag() {
 		return drag;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setNumber(int number) {
-		this.number = number;
 	}
 
 	public void setTown(String town) {

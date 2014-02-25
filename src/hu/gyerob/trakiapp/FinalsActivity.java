@@ -1,7 +1,17 @@
 package hu.gyerob.trakiapp;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jsonParser.JSONParser;
+
+import org.apache.http.NameValuePair;
+import org.json.JSONObject;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,9 +23,17 @@ public class FinalsActivity extends Activity {
 
 	private Button drag;
 	private Button slalom;
+	private Button slalomlock;
+	private Button draglock;
 	private CheckBox dragcheck;
 	private CheckBox slalomcheck;
+	
+	private static String url_lock_slalom = "http://gyerob.no-ip.biz/trakiweb/create_slalom_top.php";
+	private static String url_lock_drag = "http://gyerob.no-ip.biz/trakiweb/create_drag_top.php";
 
+	private ProgressDialog pDialog;
+	private JSONParser jsonParser;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -23,11 +41,17 @@ public class FinalsActivity extends Activity {
 
 		drag = (Button) findViewById(R.id.finalsDragbtn);
 		slalom = (Button) findViewById(R.id.finalsSlalombtn);
+		slalomlock = (Button) findViewById(R.id.btnlockslalom);
+		draglock = (Button) findViewById(R.id.btnlockdrag);
 		dragcheck = (CheckBox) findViewById(R.id.checkdragend);
 		slalomcheck = (CheckBox) findViewById(R.id.checkslalomend);
 
 		slalom.setOnClickListener(click);
+		slalomlock.setOnClickListener(click);
 		drag.setOnClickListener(click);
+		draglock.setOnClickListener(click);
+		
+		jsonParser = new JSONParser();
 	}
 
 	OnClickListener click = new OnClickListener() {
@@ -42,6 +66,7 @@ public class FinalsActivity extends Activity {
 						FinalsDragActivity.class);
 				i.putExtra("vege", dragcheck.isChecked());
 				Log.d("nyomás", "drag");
+				startActivity(i);
 				break;
 			}
 			case R.id.finalsSlalombtn: {
@@ -49,10 +74,85 @@ public class FinalsActivity extends Activity {
 						FinalsSlalomActivity.class);
 				i.putExtra("vege", slalomcheck.isChecked());
 				Log.d("nyomás", "slalom");
+				startActivity(i);
+				break;
+			}
+			case R.id.btnlockslalom: {
+				new LockSlalom().execute();
+				break;
+			}
+			case R.id.btnlockdrag: {
+				new LockDrag().execute();
 				break;
 			}
 			}
-			startActivity(i);
+			
 		}
 	};
+
+	class LockSlalom extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(FinalsActivity.this);
+			pDialog.setMessage("Versenyszám lezárása");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... param) {
+			// Building Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+			// getting JSON Object
+			// Note that create product url accepts POST method
+			JSONObject json = jsonParser.makeHttpRequest(url_lock_slalom,
+					"POST", params);
+
+			// check log cat fro response
+			Log.d("Create Response", json.toString());
+			return null;
+		}
+
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once done
+			pDialog.dismiss();
+		}
+	}
+
+	class LockDrag extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(FinalsActivity.this);
+			pDialog.setMessage("Versenyszám lezárása");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... param) {
+			// Building Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+			// getting JSON Object
+			// Note that create product url accepts POST method
+			JSONObject json = jsonParser.makeHttpRequest(url_lock_drag,
+					"POST", params);
+
+			// check log cat fro response
+			Log.d("Create Response", json.toString());
+			return null;
+		}
+
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once done
+			pDialog.dismiss();
+		}
+	}
 }

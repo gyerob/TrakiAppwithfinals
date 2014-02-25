@@ -133,8 +133,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/inputracerbtn"
-        android:layout_alignBottom="@+id/inputracerbtn"
-        android:layout_alignLeft="@+id/inputracerDrag"
+        android:layout_marginTop="24dp"
+        android:layout_toRightOf="@+id/inputracerbtn"
         android:text="@string/btn_delete" />
 
 </RelativeLayout>

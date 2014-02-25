@@ -17,10 +17,10 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import data.Racer;
 
 public class RacerFragment extends ListFragment {
@@ -58,6 +58,8 @@ public class RacerFragment extends ListFragment {
 
 	class LoadAllRacer extends AsyncTask<String, String, String> {
 
+		boolean failed = false;
+
 		/**
 		 * Before starting background thread Show Progress Dialog
 		 * */
@@ -80,9 +82,6 @@ public class RacerFragment extends ListFragment {
 			// getting JSON string from URL
 			JSONObject json = jParser.makeHttpRequest(url_all_racer, "GET",
 					params);
-
-			// Check your log cat for JSON reponse
-			Log.d("All Racer: ", json.toString());
 
 			try {
 				// Checking for SUCCESS TAG
@@ -116,6 +115,9 @@ public class RacerFragment extends ListFragment {
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
+			} catch (Exception e) {
+				failed = true;
+				e.printStackTrace();
 			}
 
 			return null;
@@ -124,10 +126,16 @@ public class RacerFragment extends ListFragment {
 		protected void onPostExecute(String file_url) {
 
 			pDialog.dismiss();
-			
-			adapter = new RacerAdapter(racerList);
-			Log.d("listaméret:", Integer.toString(racerList.size()));
-			setListAdapter(adapter);
+
+			if (failed) {
+				Toast.makeText(
+						RacerFragment.this.getActivity(),
+						"Sikertelen lekérés, ellenõrizd az internetkapcsolatot",
+						Toast.LENGTH_LONG).show();
+			} else {
+				adapter = new RacerAdapter(racerList);
+				setListAdapter(adapter);
+			}
 		}
 	}
 }
