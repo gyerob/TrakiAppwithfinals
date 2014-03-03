@@ -7,7 +7,7 @@ import android.webkit.WebViewClient;
 
 public class GalleryActivity extends Activity {
 
-	private static final int SELECT_PHOTO = 100;
+	//private static final int SELECT_PHOTO = 100;
 	
 	private WebView webView;
 
