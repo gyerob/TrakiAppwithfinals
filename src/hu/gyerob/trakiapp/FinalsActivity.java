@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
 
 public class FinalsActivity extends Activity {
 
@@ -25,8 +24,6 @@ public class FinalsActivity extends Activity {
 	private Button slalom;
 	private Button slalomlock;
 	private Button draglock;
-	private CheckBox dragcheck;
-	private CheckBox slalomcheck;
 	
 	private static String url_lock_slalom = "http://gyerob.no-ip.biz/trakiweb/create_slalom_top.php";
 	private static String url_lock_drag = "http://gyerob.no-ip.biz/trakiweb/create_drag_top.php";
@@ -43,8 +40,6 @@ public class FinalsActivity extends Activity {
 		slalom = (Button) findViewById(R.id.finalsSlalombtn);
 		slalomlock = (Button) findViewById(R.id.btnlockslalom);
 		draglock = (Button) findViewById(R.id.btnlockdrag);
-		dragcheck = (CheckBox) findViewById(R.id.checkdragend);
-		slalomcheck = (CheckBox) findViewById(R.id.checkslalomend);
 
 		slalom.setOnClickListener(click);
 		slalomlock.setOnClickListener(click);
@@ -64,16 +59,12 @@ public class FinalsActivity extends Activity {
 			case R.id.finalsDragbtn: {
 				i = new Intent(getApplicationContext(),
 						FinalsDragActivity.class);
-				i.putExtra("vege", dragcheck.isChecked());
-				Log.d("nyomás", "drag");
 				startActivity(i);
 				break;
 			}
 			case R.id.finalsSlalombtn: {
 				i = new Intent(getApplicationContext(),
 						FinalsSlalomActivity.class);
-				i.putExtra("vege", slalomcheck.isChecked());
-				Log.d("nyomás", "slalom");
 				startActivity(i);
 				break;
 			}

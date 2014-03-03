@@ -60,7 +60,7 @@ public class DragAdapter extends BaseAdapter {
 		number.setText(Integer.toString(drag.getNumber()));
 		ido1.setText(drag.getIdo1());
 		ido2.setText(drag.getIdo2());
-		lido.setText(drag.getLegjobbido());
+		lido.setText(drag.getLegjobbIdo());
 		
 		return view;
 	}

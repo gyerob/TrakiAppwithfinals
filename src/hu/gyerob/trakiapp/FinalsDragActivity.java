@@ -10,17 +10,15 @@ public class FinalsDragActivity extends FragmentActivity {
 
 	private ViewPager pager;
 	private DragTop10FragmentPagerAdapter adapter;
-	public boolean veg;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.finals_drag);
-		veg = getIntent().getExtras().getBoolean("vege");
 
 		FragmentManager fm = getSupportFragmentManager();
 		pager = (ViewPager) findViewById(R.id.dragViewPager);
-		adapter = new DragTop10FragmentPagerAdapter(fm, veg);
+		adapter = new DragTop10FragmentPagerAdapter(fm);
 		pager.setAdapter(adapter);
 	}
 }

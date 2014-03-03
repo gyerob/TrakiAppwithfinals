@@ -27,18 +27,18 @@ public class RacerFragment extends ListFragment {
 	public static final String TITLE = "Versenyzõk";
 
 	private RacerAdapter adapter;
-	ArrayList<Racer> racerList;
+	private ArrayList<Racer> racerList;
 
 	public ProgressDialog pDialog;
 
-	JSONParser jParser = new JSONParser();
+	private JSONParser jParser = new JSONParser();
 
 	private static String url_all_racer = "http://gyerob.no-ip.biz/trakiweb/get_all_racer.php";
 
 	private static final String TAG_SUCCESS = "success";
 	private static final String TAG_PRODUCTS = "racers";
 
-	JSONArray racers = null;
+	private JSONArray racers = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

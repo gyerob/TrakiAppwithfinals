@@ -1,5 +1,6 @@
 package toplistview;
 
+import finalsdragfragments.DragTop10Fragment1;
 import finalsslalomfragments.SlalomTop10Fragment1;
 import hu.gyerob.trakiapp.R;
 import android.content.Context;
@@ -116,7 +117,7 @@ public class ToplistView extends LinearLayout {
 		this.listener = listener;
 	}
 	
-	public void setDragListener(SlalomTop10Fragment1 listener) {
+	public void setDragListener(DragTop10Fragment1 listener) {
 		this.listener = listener;
 	}
 

@@ -16,9 +16,11 @@ import org.json.JSONObject;
 import toplistview.ToplistView;
 import toplistview.ToplistView.IListViewUpdate;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,7 +72,7 @@ public class SlalomTop10Fragment1 extends Fragment implements IListViewUpdate {
 	ToplistView tvRound42;
 	ToplistView tvRound43;
 	ToplistView tvRound44;
-	
+
 	ArrayList<ToplistView> topracers;
 
 	@Override
@@ -141,17 +143,17 @@ public class SlalomTop10Fragment1 extends Fragment implements IListViewUpdate {
 		tvRound16.setRound(1);
 		tvRound17.setRound(1);
 		tvRound18.setRound(1);
-		
+
 		tvRound21.setRound(2);
 		tvRound22.setRound(2);
 		tvRound23.setRound(2);
 		tvRound24.setRound(2);
-		
+
 		tvRound31.setRound(3);
 		tvRound32.setRound(3);
 		tvRound33.setRound(3);
 		tvRound34.setRound(3);
-		
+
 		tvRound41.setRound(4);
 		tvRound42.setRound(4);
 		tvRound43.setRound(4);
@@ -173,7 +175,7 @@ public class SlalomTop10Fragment1 extends Fragment implements IListViewUpdate {
 		new UpdateList().execute(tv);
 	}
 
-	class UpdateList extends AsyncTask<ToplistView, String, String> {
+	class UpdateList extends AsyncTask<ToplistView, String, ToplistView> {
 
 		@Override
 		protected void onPreExecute() {
@@ -187,7 +189,7 @@ public class SlalomTop10Fragment1 extends Fragment implements IListViewUpdate {
 		}
 
 		@Override
-		protected String doInBackground(ToplistView... param) {
+		protected ToplistView doInBackground(ToplistView... param) {
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("rajt", Integer.toString(param[0]
 					.getNumber())));
@@ -210,8 +212,6 @@ public class SlalomTop10Fragment1 extends Fragment implements IListViewUpdate {
 			Log.d("Create Response", json.toString());
 
 			if (param[0].getWin() == 2) {
-				int pid = 0;
-
 				params = new ArrayList<NameValuePair>();
 				params.add(new BasicNameValuePair("rajt", Integer
 						.toString(param[0].getNumber())));
@@ -232,29 +232,150 @@ public class SlalomTop10Fragment1 extends Fragment implements IListViewUpdate {
 					} else if (param[0].getPid() == 5 || param[0].getPid() == 4) {
 						params.add(new BasicNameValuePair("pid", Integer
 								.toString(1)));
-
-						tvRound21.setWin(0);
-						tvRound21.setNumber(param[0].getNumber());
-						tvRound21.setPid(param[0].getPid());
+					}
+					json = jsonParser.makeHttpRequest(
+							url_update_next_slalom_top, "POST", params);
+				} else if (param[0].getRound() == 2) {
+					if (param[0].getPid() == 1 || param[0].getPid() == 2) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(1)));
+					} else if (param[0].getPid() == 3 || param[0].getPid() == 4) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(4)));
+					}
+					json = jsonParser.makeHttpRequest(
+							url_update_next_slalom_top, "POST", params);
+				} else if (param[0].getRound() == 3) {
+					if (param[0].getPid() == 1 || param[0].getPid() == 2) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(1)));
+						json = jsonParser.makeHttpRequest(
+								url_update_next_slalom_top, "POST", params);
+						if (param[0].getPid() == 1) {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound32.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound32
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound32.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(3)));
+						} else {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound31.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound31
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound31.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(3)));
+						}
+						json = jsonParser.makeHttpRequest(
+								url_update_next_slalom_top, "POST", params);
+					} else if (param[0].getPid() == 3 || param[0].getPid() == 4) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(2)));
+						json = jsonParser.makeHttpRequest(
+								url_update_next_slalom_top, "POST", params);
+						if (param[0].getPid() == 3) {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound34.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound34
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound34.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(4)));
+						} else {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound33.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound33
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound33.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(4)));
+						}
+						json = jsonParser.makeHttpRequest(
+								url_update_next_slalom_top, "POST", params);
 					}
 				}
 
-				json = jsonParser.makeHttpRequest(url_update_next_slalom_top,
-						"POST", params);
+				Intent intent = new Intent("szfrissit");
+				LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
 				
 				Log.d("Create Response", json.toString());
-
-				return param[0].getName();
 			}
 
-			return null;
+			return param[0];
 		}
 
-		protected void onPostExecute(String nev) {
+		protected void onPostExecute(ToplistView nev) {
 			// dismiss the dialog once done
 			pDialog.dismiss();
-			
-			tvRound21.setName(nev);
+			if (nev.getWin() == 2) {
+				if (nev.getRound() == 1) {
+					if (nev.getPid() == 8 || nev.getPid() == 1) {
+						tvRound23.setNumber(nev.getNumber());
+						tvRound23.setPid(nev.getPid());
+						tvRound23.setName(nev.getName());
+					} else if (nev.getPid() == 7 || nev.getPid() == 2) {
+						tvRound22.setNumber(nev.getNumber());
+						tvRound22.setPid(nev.getPid());
+						tvRound22.setName(nev.getName());
+					} else if (nev.getPid() == 6 || nev.getPid() == 3) {
+						tvRound24.setNumber(nev.getNumber());
+						tvRound24.setPid(nev.getPid());
+						tvRound24.setName(nev.getName());
+					} else if (nev.getPid() == 5 || nev.getPid() == 4) {
+						tvRound21.setNumber(nev.getNumber());
+						tvRound21.setPid(nev.getPid());
+						tvRound21.setName(nev.getName());
+					}
+				} else if (nev.getRound() == 2) {
+					if (nev.getPid() == 1 || nev.getPid() == 2) {
+						tvRound31.setNumber(nev.getNumber());
+						tvRound31.setPid(nev.getPid());
+						tvRound31.setName(nev.getName());
+					} else if (nev.getPid() == 3 || nev.getPid() == 4) {
+						tvRound34.setNumber(nev.getNumber());
+						tvRound34.setPid(nev.getPid());
+						tvRound34.setName(nev.getName());
+					}
+				} else if (nev.getRound() == 3) {
+					if (nev.getPid() == 1 || nev.getPid() == 2) {
+						tvRound41.setNumber(nev.getNumber());
+						tvRound41.setPid(nev.getPid());
+						tvRound41.setName(nev.getName());
+						if (nev.getPid() == 1) {
+							tvRound43.setNumber(tvRound32.getNumber());
+							tvRound43.setPid(tvRound32.getPid());
+							tvRound43.setName(tvRound32.getName());
+						} else {
+							tvRound43.setNumber(tvRound31.getNumber());
+							tvRound43.setPid(tvRound31.getPid());
+							tvRound43.setName(tvRound31.getName());
+						}
+					} else if (nev.getPid() == 3 || nev.getPid() == 4) {
+						tvRound42.setNumber(nev.getNumber());
+						tvRound42.setPid(nev.getPid());
+						tvRound42.setName(nev.getName());
+						if (nev.getPid() == 4) {
+							tvRound44.setNumber(tvRound33.getNumber());
+							tvRound44.setPid(tvRound33.getPid());
+							tvRound44.setName(tvRound33.getName());
+						} else {
+							tvRound44.setNumber(tvRound34.getNumber());
+							tvRound44.setPid(tvRound34.getPid());
+							tvRound44.setName(tvRound34.getName());
+						}
+					}
+				}
+			}
 		}
 	}
 

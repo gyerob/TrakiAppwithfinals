@@ -11,10 +11,9 @@ public class DragTop10FragmentPagerAdapter extends FragmentStatePagerAdapter {
 	private DragTop10Fragment1 f1;
 	private DragTop10Fragment2 f2;
 
-	public DragTop10FragmentPagerAdapter(FragmentManager fm, boolean veg) {
+	public DragTop10FragmentPagerAdapter(FragmentManager fm) {
 		super(fm);
 		f1 = new DragTop10Fragment1();
-		f1.setVeg(veg);
 		f2 = new DragTop10Fragment2();
 	}
 

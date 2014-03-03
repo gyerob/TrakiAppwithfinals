@@ -3,1466 +3,529 @@ package finalsdragfragments;
 import hu.gyerob.trakiapp.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
-import android.database.Cursor;
-import android.graphics.Color;
+import jsonParser.JSONParser;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import toplistview.ToplistView;
+import toplistview.ToplistView.IListViewUpdate;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.TextView;
-import application.App;
-import data.Finals;
-import datastorage.DbConstants;
-import datastorage.DbLoader;
+import android.widget.Toast;
+import data.DragTop;
 
-public class DragTop10Fragment1 extends Fragment {
+public class DragTop10Fragment1 extends Fragment implements IListViewUpdate {
 	public static final String TITLE = "Lépcsõk";
 
-	private DbLoader dbLoader;
+	private static String url_get_drag_top = "http://gyerob.no-ip.biz/trakiweb/get_all_drag_top.php";
+	private static String url_update_drag_top = "http://gyerob.no-ip.biz/trakiweb/update_drag_top.php";
+	private static String url_update_next_drag_top = "http://gyerob.no-ip.biz/trakiweb/update_next_drag_top.php";
 
-	private boolean veg;
-	private boolean loading;
-	private ArrayList<Integer> kiesettr1;
-	private ArrayList<Integer> kiesettr2;
+	private static final String TAG_SUCCESS = "success";
+	private static final String TAG_PRODUCTS = "racers";
 
-	private CheckBox chkr111;
-	private CheckBox chkr112;
-	private CheckBox chkr121;
-	private CheckBox chkr122;
-	private CheckBox chkr131;
-	private CheckBox chkr132;
-	private CheckBox chkr141;
-	private CheckBox chkr142;
-	private CheckBox chkr151;
-	private CheckBox chkr152;
-	private CheckBox chkr161;
-	private CheckBox chkr162;
-	private CheckBox chkr171;
-	private CheckBox chkr172;
-	private CheckBox chkr181;
-	private CheckBox chkr182;
+	// Progress Dialog
+	private ProgressDialog pDialog;
 
-	private CheckBox chkr211;
-	private CheckBox chkr212;
-	private CheckBox chkr221;
-	private CheckBox chkr222;
-	private CheckBox chkr231;
-	private CheckBox chkr232;
-	private CheckBox chkr241;
-	private CheckBox chkr242;
+	private JSONParser jsonParser;
 
-	private CheckBox chkr311;
-	private CheckBox chkr312;
-	private CheckBox chkr321;
-	private CheckBox chkr322;
-	private CheckBox chkr331;
-	private CheckBox chkr332;
-	private CheckBox chkr341;
-	private CheckBox chkr342;
+	private ArrayList<DragTop> dragListr1;
+	private ArrayList<DragTop> dragListr2;
+	private ArrayList<DragTop> dragListr3;
+	private ArrayList<DragTop> dragListr4;
+	private JSONArray racers = null;
 
-	private CheckBox chkr411;
-	private CheckBox chkr412;
-	private CheckBox chkr421;
-	private CheckBox chkr422;
-	private CheckBox chkr431;
-	private CheckBox chkr432;
-	private CheckBox chkr441;
-	private CheckBox chkr442;
+	ToplistView tvRound11;
+	ToplistView tvRound12;
+	ToplistView tvRound13;
+	ToplistView tvRound14;
+	ToplistView tvRound15;
+	ToplistView tvRound16;
+	ToplistView tvRound17;
+	ToplistView tvRound18;
 
-	private TextView txtr11;
-	private TextView txtr12;
-	private TextView txtr13;
-	private TextView txtr14;
-	private TextView txtr15;
-	private TextView txtr16;
-	private TextView txtr17;
-	private TextView txtr18;
+	ToplistView tvRound21;
+	ToplistView tvRound22;
+	ToplistView tvRound23;
+	ToplistView tvRound24;
 
-	private TextView txtr21;
-	private TextView txtr22;
-	private TextView txtr23;
-	private TextView txtr24;
+	ToplistView tvRound31;
+	ToplistView tvRound32;
+	ToplistView tvRound33;
+	ToplistView tvRound34;
 
-	private TextView txtr31;
-	private TextView txtr32;
-	private TextView txtr33;
-	private TextView txtr34;
+	ToplistView tvRound41;
+	ToplistView tvRound42;
+	ToplistView tvRound43;
+	ToplistView tvRound44;
 
-	private TextView txtr41;
-	private TextView txtr42;
-	private TextView txtr43;
-	private TextView txtr44;
-
-	private Cursor c;
-	private Finals f;
-
-	public void setVeg(boolean veg) {
-		this.veg = veg;
-	}
+	ArrayList<ToplistView> topracers;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		dbLoader = App.getDbLoader();
-		kiesettr1 = new ArrayList<Integer>();
-		kiesettr2 = new ArrayList<Integer>();
+		jsonParser = new JSONParser();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.finalsdragscrollv, container, false);
+		View v = inflater.inflate(R.layout.finalsdragscrollv2, container,
+				false);
 
-		txtr11 = (TextView) v.findViewById(R.id.draground1Text1);
-		txtr12 = (TextView) v.findViewById(R.id.draground1Text2);
-		txtr13 = (TextView) v.findViewById(R.id.draground1Text3);
-		txtr14 = (TextView) v.findViewById(R.id.draground1Text4);
-		txtr15 = (TextView) v.findViewById(R.id.draground1Text5);
-		txtr16 = (TextView) v.findViewById(R.id.draground1Text6);
-		txtr17 = (TextView) v.findViewById(R.id.draground1Text7);
-		txtr18 = (TextView) v.findViewById(R.id.draground1Text8);
+		tvRound11 = (ToplistView) v.findViewById(R.id.dtoplistr11);
+		tvRound12 = (ToplistView) v.findViewById(R.id.dtoplistr12);
+		tvRound13 = (ToplistView) v.findViewById(R.id.dtoplistr13);
+		tvRound14 = (ToplistView) v.findViewById(R.id.dtoplistr14);
+		tvRound15 = (ToplistView) v.findViewById(R.id.dtoplistr15);
+		tvRound16 = (ToplistView) v.findViewById(R.id.dtoplistr16);
+		tvRound17 = (ToplistView) v.findViewById(R.id.dtoplistr17);
+		tvRound18 = (ToplistView) v.findViewById(R.id.dtoplistr18);
 
-		txtr21 = (TextView) v.findViewById(R.id.draground2Text1);
-		txtr22 = (TextView) v.findViewById(R.id.draground2Text2);
-		txtr23 = (TextView) v.findViewById(R.id.draground2Text3);
-		txtr24 = (TextView) v.findViewById(R.id.draground2Text4);
+		tvRound21 = (ToplistView) v.findViewById(R.id.dtoplistr21);
+		tvRound22 = (ToplistView) v.findViewById(R.id.dtoplistr22);
+		tvRound23 = (ToplistView) v.findViewById(R.id.dtoplistr23);
+		tvRound24 = (ToplistView) v.findViewById(R.id.dtoplistr24);
 
-		txtr31 = (TextView) v.findViewById(R.id.draground3Text1);
-		txtr32 = (TextView) v.findViewById(R.id.draground3Text2);
-		txtr33 = (TextView) v.findViewById(R.id.draground3Text3);
-		txtr34 = (TextView) v.findViewById(R.id.draground3Text4);
+		tvRound31 = (ToplistView) v.findViewById(R.id.dtoplistr31);
+		tvRound32 = (ToplistView) v.findViewById(R.id.dtoplistr32);
+		tvRound33 = (ToplistView) v.findViewById(R.id.dtoplistr33);
+		tvRound34 = (ToplistView) v.findViewById(R.id.dtoplistr34);
 
-		txtr41 = (TextView) v.findViewById(R.id.draground4Text1);
-		txtr42 = (TextView) v.findViewById(R.id.draground4Text2);
-		txtr43 = (TextView) v.findViewById(R.id.draground4Text3);
-		txtr44 = (TextView) v.findViewById(R.id.draground4Text4);
+		tvRound41 = (ToplistView) v.findViewById(R.id.dtoplistr41);
+		tvRound42 = (ToplistView) v.findViewById(R.id.dtoplistr42);
+		tvRound43 = (ToplistView) v.findViewById(R.id.dtoplistr43);
+		tvRound44 = (ToplistView) v.findViewById(R.id.dtoplistr44);
 
-		txtr11.setTextColor(Color.BLACK);
-		txtr12.setTextColor(Color.BLACK);
-		txtr13.setTextColor(Color.BLACK);
-		txtr14.setTextColor(Color.BLACK);
-		txtr15.setTextColor(Color.BLACK);
-		txtr16.setTextColor(Color.BLACK);
-		txtr17.setTextColor(Color.BLACK);
-		txtr18.setTextColor(Color.BLACK);
+		tvRound11.setDragListener(this);
+		tvRound12.setDragListener(this);
+		tvRound13.setDragListener(this);
+		tvRound14.setDragListener(this);
+		tvRound15.setDragListener(this);
+		tvRound16.setDragListener(this);
+		tvRound17.setDragListener(this);
+		tvRound18.setDragListener(this);
 
-		txtr21.setTextColor(Color.BLACK);
-		txtr22.setTextColor(Color.BLACK);
-		txtr23.setTextColor(Color.BLACK);
-		txtr24.setTextColor(Color.BLACK);
+		tvRound21.setDragListener(this);
+		tvRound22.setDragListener(this);
+		tvRound23.setDragListener(this);
+		tvRound24.setDragListener(this);
 
-		txtr31.setTextColor(Color.BLACK);
-		txtr32.setTextColor(Color.BLACK);
-		txtr33.setTextColor(Color.BLACK);
-		txtr34.setTextColor(Color.BLACK);
+		tvRound31.setDragListener(this);
+		tvRound32.setDragListener(this);
+		tvRound33.setDragListener(this);
+		tvRound34.setDragListener(this);
 
-		txtr41.setTextColor(Color.BLACK);
-		txtr42.setTextColor(Color.BLACK);
-		txtr43.setTextColor(Color.BLACK);
-		txtr44.setTextColor(Color.BLACK);
+		tvRound41.setDragListener(this);
+		tvRound42.setDragListener(this);
+		tvRound43.setDragListener(this);
+		tvRound44.setDragListener(this);
 
-		chkr111 = (CheckBox) v.findViewById(R.id.draground1chk11);
-		chkr112 = (CheckBox) v.findViewById(R.id.draground1chk12);
-		chkr121 = (CheckBox) v.findViewById(R.id.draground1chk21);
-		chkr122 = (CheckBox) v.findViewById(R.id.draground1chk22);
-		chkr131 = (CheckBox) v.findViewById(R.id.draground1chk31);
-		chkr132 = (CheckBox) v.findViewById(R.id.draground1chk32);
-		chkr141 = (CheckBox) v.findViewById(R.id.draground1chk41);
-		chkr142 = (CheckBox) v.findViewById(R.id.draground1chk42);
-		chkr151 = (CheckBox) v.findViewById(R.id.draground1chk51);
-		chkr152 = (CheckBox) v.findViewById(R.id.draground1chk52);
-		chkr161 = (CheckBox) v.findViewById(R.id.draground1chk61);
-		chkr162 = (CheckBox) v.findViewById(R.id.draground1chk62);
-		chkr171 = (CheckBox) v.findViewById(R.id.draground1chk71);
-		chkr172 = (CheckBox) v.findViewById(R.id.draground1chk72);
-		chkr181 = (CheckBox) v.findViewById(R.id.draground1chk81);
-		chkr182 = (CheckBox) v.findViewById(R.id.draground1chk82);
+		tvRound11.setRound(1);
+		tvRound12.setRound(1);
+		tvRound13.setRound(1);
+		tvRound14.setRound(1);
+		tvRound15.setRound(1);
+		tvRound16.setRound(1);
+		tvRound17.setRound(1);
+		tvRound18.setRound(1);
 
-		chkr211 = (CheckBox) v.findViewById(R.id.draground2chk11);
-		chkr212 = (CheckBox) v.findViewById(R.id.draground2chk12);
-		chkr221 = (CheckBox) v.findViewById(R.id.draground2chk21);
-		chkr222 = (CheckBox) v.findViewById(R.id.draground2chk22);
-		chkr231 = (CheckBox) v.findViewById(R.id.draground2chk31);
-		chkr232 = (CheckBox) v.findViewById(R.id.draground2chk32);
-		chkr241 = (CheckBox) v.findViewById(R.id.draground2chk41);
-		chkr242 = (CheckBox) v.findViewById(R.id.draground2chk42);
+		tvRound21.setRound(2);
+		tvRound22.setRound(2);
+		tvRound23.setRound(2);
+		tvRound24.setRound(2);
 
-		chkr311 = (CheckBox) v.findViewById(R.id.draground3chk11);
-		chkr312 = (CheckBox) v.findViewById(R.id.draground3chk12);
-		chkr321 = (CheckBox) v.findViewById(R.id.draground3chk21);
-		chkr322 = (CheckBox) v.findViewById(R.id.draground3chk22);
-		chkr331 = (CheckBox) v.findViewById(R.id.draground3chk31);
-		chkr332 = (CheckBox) v.findViewById(R.id.draground3chk32);
-		chkr341 = (CheckBox) v.findViewById(R.id.draground3chk41);
-		chkr342 = (CheckBox) v.findViewById(R.id.draground3chk42);
+		tvRound31.setRound(3);
+		tvRound32.setRound(3);
+		tvRound33.setRound(3);
+		tvRound34.setRound(3);
 
-		chkr411 = (CheckBox) v.findViewById(R.id.draground4chk11);
-		chkr412 = (CheckBox) v.findViewById(R.id.draground4chk12);
-		chkr421 = (CheckBox) v.findViewById(R.id.draground4chk21);
-		chkr422 = (CheckBox) v.findViewById(R.id.draground4chk22);
-		chkr431 = (CheckBox) v.findViewById(R.id.draground4chk31);
-		chkr432 = (CheckBox) v.findViewById(R.id.draground4chk32);
-		chkr441 = (CheckBox) v.findViewById(R.id.draground4chk41);
-		chkr442 = (CheckBox) v.findViewById(R.id.draground4chk42);
+		tvRound41.setRound(4);
+		tvRound42.setRound(4);
+		tvRound43.setRound(4);
+		tvRound44.setRound(4);
 
-		chkr112.setClickable(false);
-		chkr122.setClickable(false);
-		chkr132.setClickable(false);
-		chkr142.setClickable(false);
-		chkr152.setClickable(false);
-		chkr162.setClickable(false);
-		chkr172.setClickable(false);
-		chkr182.setClickable(false);
-
-		chkr212.setClickable(false);
-		chkr222.setClickable(false);
-		chkr232.setClickable(false);
-		chkr242.setClickable(false);
-
-		chkr312.setClickable(false);
-		chkr322.setClickable(false);
-		chkr332.setClickable(false);
-		chkr342.setClickable(false);
-
-		chkr412.setClickable(false);
-		chkr422.setClickable(false);
-		chkr432.setClickable(false);
-		chkr442.setClickable(false);
-
-		chkr111.setOnCheckedChangeListener(click);
-		chkr112.setOnCheckedChangeListener(click);
-		chkr121.setOnCheckedChangeListener(click);
-		chkr122.setOnCheckedChangeListener(click);
-		chkr131.setOnCheckedChangeListener(click);
-		chkr132.setOnCheckedChangeListener(click);
-		chkr141.setOnCheckedChangeListener(click);
-		chkr142.setOnCheckedChangeListener(click);
-		chkr151.setOnCheckedChangeListener(click);
-		chkr152.setOnCheckedChangeListener(click);
-		chkr161.setOnCheckedChangeListener(click);
-		chkr162.setOnCheckedChangeListener(click);
-		chkr171.setOnCheckedChangeListener(click);
-		chkr172.setOnCheckedChangeListener(click);
-		chkr181.setOnCheckedChangeListener(click);
-		chkr182.setOnCheckedChangeListener(click);
-
-		chkr211.setOnCheckedChangeListener(click);
-		chkr212.setOnCheckedChangeListener(click);
-		chkr221.setOnCheckedChangeListener(click);
-		chkr222.setOnCheckedChangeListener(click);
-		chkr231.setOnCheckedChangeListener(click);
-		chkr232.setOnCheckedChangeListener(click);
-		chkr241.setOnCheckedChangeListener(click);
-		chkr242.setOnCheckedChangeListener(click);
-
-		chkr311.setOnCheckedChangeListener(click);
-		chkr312.setOnCheckedChangeListener(click);
-		chkr321.setOnCheckedChangeListener(click);
-		chkr322.setOnCheckedChangeListener(click);
-		chkr331.setOnCheckedChangeListener(click);
-		chkr332.setOnCheckedChangeListener(click);
-		chkr341.setOnCheckedChangeListener(click);
-		chkr342.setOnCheckedChangeListener(click);
-
-		chkr411.setOnCheckedChangeListener(click);
-		chkr412.setOnCheckedChangeListener(click);
-		chkr421.setOnCheckedChangeListener(click);
-		chkr422.setOnCheckedChangeListener(click);
-		chkr431.setOnCheckedChangeListener(click);
-		chkr432.setOnCheckedChangeListener(click);
-		chkr441.setOnCheckedChangeListener(click);
-		chkr442.setOnCheckedChangeListener(click);
-
-		Cursor c;
-
-		if (veg) {
-			loading = true;
-			if (App.isDragloaded()) {
-				setNames();
-			} else {
-				c = dbLoader.fetchAllDrag();
-				int i = 0;
-				while (c.moveToNext()) {
-					i++;
-				}
-				if (i > 9) {
-					loadStartData();
-					App.setDragloaded(true);
-				}
-			}
-			loading = false;
-		}
+		dragListr1 = new ArrayList<DragTop>();
+		dragListr2 = new ArrayList<DragTop>();
+		dragListr3 = new ArrayList<DragTop>();
+		dragListr4 = new ArrayList<DragTop>();
+		new GetList().execute();
 
 		return v;
 	}
 
-	public void loadStartData() {
-		Finals f;
-		Cursor c;
-		c = dbLoader.fetchAllDrag();
+	@Override
+	public void onRacerClick(ToplistView tv) {
+		Log.d("katt elfogás", "sikeres");
 
-		// 1.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound3(f, 2);
-		txtr32.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 2.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound3(f, 3);
-		txtr33.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 3.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 6);
-		txtr16.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 4.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 3);
-		txtr13.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 5.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 7);
-		txtr17.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 6.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 2);
-		txtr12.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 7.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 1);
-		txtr11.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 8.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 8);
-		txtr18.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 9.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 4);
-		txtr14.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
-
-		// 10.
-		c.moveToNext();
-		f = new Finals(
-				c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)),
-				c.getInt(c.getColumnIndex(DbConstants.Drag.Key_Rajtszam)), 0);
-		dbLoader.updateDragRound1(f, 5);
-		txtr15.setText(c.getString(c.getColumnIndex(DbConstants.Drag.Key_Name)));
+		new UpdateList().execute(tv);
 	}
 
-	public void setNames() {
-		Cursor c;
-		Finals f;
+	class UpdateList extends AsyncTask<ToplistView, String, ToplistView> {
 
-		/*
-		 * 
-		 * 1. kör
-		 */
-		c = dbLoader.fetchAllDragTop10R1();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr111.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr111.setChecked(true);
-			chkr112.setChecked(true);
-			chkr112.setClickable(true);
-		}
-		txtr11.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr121.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr121.setChecked(true);
-			chkr122.setChecked(true);
-			chkr122.setClickable(true);
-		}
-		txtr12.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr131.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr131.setChecked(true);
-			chkr132.setChecked(true);
-			chkr132.setClickable(true);
-		}
-		txtr13.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr141.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr141.setChecked(true);
-			chkr142.setChecked(true);
-			chkr142.setClickable(true);
-		}
-		txtr14.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr151.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr151.setChecked(true);
-			chkr152.setChecked(true);
-			chkr152.setClickable(true);
-		}
-		txtr15.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr161.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr161.setChecked(true);
-			chkr162.setChecked(true);
-			chkr162.setClickable(true);
-		}
-		txtr16.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr171.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr171.setChecked(true);
-			chkr172.setChecked(true);
-			chkr172.setClickable(true);
-		}
-		txtr17.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr181.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr181.setChecked(true);
-			chkr182.setChecked(true);
-			chkr182.setClickable(true);
-		}
-		txtr18.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		/*
-		 * 
-		 * 2. kör
-		 */
-		c = dbLoader.fetchAllDragTop10R2();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr211.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr211.setChecked(true);
-			chkr212.setChecked(true);
-			chkr212.setClickable(true);
-		}
-		txtr21.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr221.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr221.setChecked(true);
-			chkr222.setChecked(true);
-			chkr222.setClickable(true);
-		}
-		txtr22.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr231.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr231.setChecked(true);
-			chkr232.setChecked(true);
-			chkr232.setClickable(true);
-		}
-		txtr23.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr241.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr241.setChecked(true);
-			chkr242.setChecked(true);
-			chkr242.setClickable(true);
-		}
-		txtr24.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		/*
-		 * 
-		 * 3. kör
-		 */
-		c = dbLoader.fetchAllDragTop10R3();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr311.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr311.setChecked(true);
-			chkr312.setChecked(true);
-			chkr312.setClickable(true);
-		}
-		txtr31.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr321.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr321.setChecked(true);
-			chkr322.setChecked(true);
-			chkr322.setClickable(true);
-		}
-		txtr32.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr331.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr331.setChecked(true);
-			chkr332.setChecked(true);
-			chkr332.setClickable(true);
-		}
-		txtr33.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr341.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr341.setChecked(true);
-			chkr342.setChecked(true);
-			chkr342.setClickable(true);
-		}
-		txtr34.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		/*
-		 * 
-		 * 4. kör
-		 */
-		c = dbLoader.fetchAllDragTop10R4();
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr411.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr411.setChecked(true);
-			chkr412.setChecked(true);
-			chkr412.setClickable(true);
-		}
-		txtr41.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr421.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr421.setChecked(true);
-			chkr422.setChecked(true);
-			chkr422.setClickable(true);
-		}
-		txtr42.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr431.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr431.setChecked(true);
-			chkr432.setChecked(true);
-			chkr432.setClickable(true);
-		}
-		txtr43.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-
-		c.moveToNext();
-		f = new Finals(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-				c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)));
-		if (f.getWon() == 1) {
-			chkr441.setChecked(true);
-		} else if (f.getWon() == 2) {
-			chkr441.setChecked(true);
-			chkr442.setChecked(true);
-			chkr442.setClickable(true);
-		}
-		txtr44.setText(c.getString(c
-				.getColumnIndex(DbConstants.DragTop10.Key_Nev)));
-	}
-
-	public void setLista() {
-		Finals finals;
-		Cursor c;
-		Collections.sort(kiesettr1);
-
-		c = dbLoader.fetchAllDragTop10R1();
-		while (c.moveToNext()) {
-			finals = new Finals(c.getString(c
-					.getColumnIndex(DbConstants.DragTop10.Key_Nev)), c.getInt(c
-					.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)), c.getInt(c
-							.getColumnIndex(DbConstants.Key_ID)));
-			int j = 7;
-			for (int i = 0; i < kiesettr1.size(); i++) {
-				if(f.getWon() == kiesettr1.get(i)){
-					dbLoader.updateDragRound5(finals, j);
-					j++;
-				}
-			}
-		}
-		
-		int[] szamokr2 = new int[2];
-
-		c = dbLoader.fetchAllDragTop10R2();
-		int i = 0;
-		while (c.moveToNext()) {
-			if (c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Nyert)) != 2) {
-				szamokr2[i] = c.getInt(c
-						.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam));
-				i++;
-			}
-		}
-
-		c = dbLoader.fetchAllDragTop10R1();
-		while (c.moveToNext()) {
-			if (c.getInt(c.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)) == szamokr2[0]
-					|| c.getInt(c
-							.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)) == szamokr2[1]) {
-				kiesettr2.add(c.getInt(c.getColumnIndex(DbConstants.Key_ID)));
-			}
-		}
-
-		Collections.sort(kiesettr2);
-		// dbLoader.updateDragRound5(f, rowid);
-	}
-
-	private OnCheckedChangeListener click = new OnCheckedChangeListener() {
 		@Override
-		public void onCheckedChanged(CompoundButton v, boolean isChecked) {
-			int win1, win2;
-
-			if (v.isChecked()) {
-				win1 = 1;
-				win2 = 2;
-			} else {
-				win1 = 0;
-				win2 = 1;
-			}
-			if (!loading) {
-				switch (v.getId()) {
-				case R.id.draground1chk11: {
-					c = dbLoader.fetchDragTop10(1, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr112.setClickable(!chkr112.isClickable());
-					dbLoader.updateDragRound1(f, 1);
-					break;
-				}
-				case R.id.draground1chk21: {
-					c = dbLoader.fetchDragTop10(1, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr122.setClickable(!chkr122.isClickable());
-					dbLoader.updateDragRound1(f, 2);
-					break;
-				}
-				case R.id.draground1chk31: {
-					c = dbLoader.fetchDragTop10(1, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr132.setClickable(!chkr132.isClickable());
-					dbLoader.updateDragRound1(f, 3);
-					break;
-				}
-				case R.id.draground1chk41: {
-					c = dbLoader.fetchDragTop10(1, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr142.setClickable(!chkr142.isClickable());
-					dbLoader.updateDragRound1(f, 4);
-					break;
-				}
-				case R.id.draground1chk51: {
-					c = dbLoader.fetchDragTop10(1, 5);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr152.setClickable(!chkr152.isClickable());
-					dbLoader.updateDragRound1(f, 5);
-					break;
-				}
-				case R.id.draground1chk61: {
-					c = dbLoader.fetchDragTop10(1, 6);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr162.setClickable(!chkr162.isClickable());
-					dbLoader.updateDragRound1(f, 6);
-					break;
-				}
-				case R.id.draground1chk71: {
-					c = dbLoader.fetchDragTop10(1, 7);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr172.setClickable(!chkr172.isClickable());
-					dbLoader.updateDragRound1(f, 7);
-					break;
-				}
-				case R.id.draground1chk81: {
-					c = dbLoader.fetchDragTop10(1, 8);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr182.setClickable(!chkr182.isClickable());
-					dbLoader.updateDragRound1(f, 8);
-					break;
-				}
-
-				case R.id.draground1chk12: {
-					c = dbLoader.fetchDragTop10(1, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr21.setText(f.getName());
-					dbLoader.updateDragRound1(f, 1);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 1);
-
-					kiesettr1.add(6);
-					break;
-				}
-				case R.id.draground1chk22: {
-					c = dbLoader.fetchDragTop10(1, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr21.setText(f.getName());
-					dbLoader.updateDragRound1(f, 2);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 1);
-					kiesettr1.add(7);
-					break;
-				}
-				case R.id.draground1chk32: {
-					c = dbLoader.fetchDragTop10(1, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr22.setText(f.getName());
-					dbLoader.updateDragRound1(f, 3);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 2);
-					kiesettr1.add(9);
-					break;
-				}
-				case R.id.draground1chk42: {
-					c = dbLoader.fetchDragTop10(1, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr22.setText(f.getName());
-					dbLoader.updateDragRound1(f, 4);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 2);
-					kiesettr1.add(4);
-					break;
-				}
-				case R.id.draground1chk52: {
-					c = dbLoader.fetchDragTop10(1, 5);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr23.setText(f.getName());
-					dbLoader.updateDragRound1(f, 5);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 3);
-					kiesettr1.add(3);
-					break;
-				}
-				case R.id.draground1chk62: {
-					c = dbLoader.fetchDragTop10(1, 6);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr23.setText(f.getName());
-					dbLoader.updateDragRound1(f, 6);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 3);
-					kiesettr1.add(10);
-					break;
-				}
-				case R.id.draground1chk72: {
-					c = dbLoader.fetchDragTop10(1, 7);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr24.setText(f.getName());
-					dbLoader.updateDragRound1(f, 7);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 4);
-					kiesettr1.add(8);
-					break;
-				}
-				case R.id.draground1chk82: {
-					c = dbLoader.fetchDragTop10(1, 8);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr24.setText(f.getName());
-					dbLoader.updateDragRound1(f, 8);
-
-					f.setWon(0);
-					dbLoader.updateDragRound2(f, 4);
-					kiesettr1.add(5);
-					break;
-				}
-				case R.id.draground2chk11: {
-					c = dbLoader.fetchDragTop10(2, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr212.setClickable(!chkr212.isClickable());
-					dbLoader.updateDragRound2(f, 1);
-					break;
-				}
-				case R.id.draground2chk21: {
-					c = dbLoader.fetchDragTop10(2, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr222.setClickable(!chkr222.isClickable());
-					dbLoader.updateDragRound2(f, 2);
-					break;
-				}
-				case R.id.draground2chk31: {
-					c = dbLoader.fetchDragTop10(2, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr232.setClickable(!chkr232.isClickable());
-					dbLoader.updateDragRound2(f, 3);
-					break;
-				}
-				case R.id.draground2chk41: {
-					c = dbLoader.fetchDragTop10(2, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-					chkr242.setClickable(!chkr242.isClickable());
-					dbLoader.updateDragRound2(f, 4);
-					break;
-				}
-
-				case R.id.draground2chk12: {
-					c = dbLoader.fetchDragTop10(2, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateDragRound2(f, 1);
-
-					f.setWon(0);
-					dbLoader.updateDragRound3(f, 1);
-
-					txtr31.setText(f.getName());
-					break;
-				}
-				case R.id.draground2chk22: {
-					c = dbLoader.fetchDragTop10(2, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateDragRound2(f, 2);
-
-					f.setWon(0);
-					dbLoader.updateDragRound3(f, 1);
-
-					txtr31.setText(f.getName());
-					break;
-				}
-				case R.id.draground2chk32: {
-					c = dbLoader.fetchDragTop10(2, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateDragRound2(f, 3);
-
-					f.setWon(0);
-					dbLoader.updateDragRound3(f, 4);
-
-					txtr34.setText(f.getName());
-					break;
-				}
-				case R.id.draground2chk42: {
-					c = dbLoader.fetchDragTop10(2, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					dbLoader.updateDragRound2(f, 4);
-
-					f.setWon(0);
-					dbLoader.updateDragRound3(f, 4);
-
-					txtr34.setText(f.getName());
-					break;
-				}
-				case R.id.draground3chk11: {
-					c = dbLoader.fetchDragTop10(3, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr312.setClickable(!chkr312.isClickable());
-					dbLoader.updateDragRound3(f, 1);
-					break;
-				}
-				case R.id.draground3chk21: {
-					c = dbLoader.fetchDragTop10(3, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr322.setClickable(!chkr322.isClickable());
-					dbLoader.updateDragRound3(f, 2);
-					break;
-				}
-				case R.id.draground3chk31: {
-					c = dbLoader.fetchDragTop10(3, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr332.setClickable(!chkr332.isClickable());
-					dbLoader.updateDragRound3(f, 3);
-					break;
-				}
-				case R.id.draground3chk41: {
-					c = dbLoader.fetchDragTop10(3, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr342.setClickable(!chkr342.isClickable());
-					dbLoader.updateDragRound3(f, 4);
-					break;
-				}
-				case R.id.draground3chk12: {
-					c = dbLoader.fetchDragTop10(3, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr41.setText(f.getName());
-					dbLoader.updateDragRound3(f, 1);
-
-					f.setWon(0);
-					dbLoader.updateDragRound4(f, 1);
-
-					c = dbLoader.fetchDragTop10(3, 2);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateDragRound4(f, 3);
-					txtr43.setText(txtr32.getText());
-					break;
-				}
-				case R.id.draground3chk22: {
-					c = dbLoader.fetchDragTop10(3, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr41.setText(f.getName());
-					dbLoader.updateDragRound3(f, 2);
-
-					f.setWon(0);
-					dbLoader.updateDragRound4(f, 1);
-
-					c = dbLoader.fetchDragTop10(3, 1);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateDragRound4(f, 3);
-					txtr43.setText(txtr31.getText());
-					break;
-				}
-				case R.id.draground3chk32: {
-					c = dbLoader.fetchDragTop10(3, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr42.setText(f.getName());
-					dbLoader.updateDragRound3(f, 3);
-
-					f.setWon(0);
-					dbLoader.updateDragRound4(f, 2);
-
-					c = dbLoader.fetchDragTop10(3, 4);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateDragRound4(f, 4);
-					txtr44.setText(txtr34.getText());
-					break;
-				}
-				case R.id.draground3chk42: {
-					c = dbLoader.fetchDragTop10(3, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-					txtr42.setText(f.getName());
-					dbLoader.updateDragRound3(f, 4);
-
-					f.setWon(0);
-					dbLoader.updateDragRound4(f, 2);
-
-					c = dbLoader.fetchDragTop10(3, 3);
-					c.moveToNext();
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							0);
-					dbLoader.updateDragRound4(f, 4);
-					txtr44.setText(txtr33.getText());
-					break;
-				}
-
-				case R.id.draground4chk11: {
-					c = dbLoader.fetchDragTop10(4, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr412.setClickable(!chkr412.isClickable());
-					dbLoader.updateDragRound4(f, 1);
-					break;
-				}
-				case R.id.draground4chk21: {
-					c = dbLoader.fetchDragTop10(4, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr422.setClickable(!chkr422.isClickable());
-					dbLoader.updateDragRound4(f, 2);
-					break;
-				}
-				case R.id.draground4chk31: {
-					c = dbLoader.fetchDragTop10(4, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr432.setClickable(!chkr432.isClickable());
-					dbLoader.updateDragRound4(f, 3);
-					break;
-				}
-				case R.id.draground4chk41: {
-					c = dbLoader.fetchDragTop10(4, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win1);
-
-					chkr442.setClickable(!chkr442.isClickable());
-					dbLoader.updateDragRound4(f, 4);
-					break;
-				}
-				case R.id.draground4chk12: {
-					c = dbLoader.fetchDragTop10(4, 1);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateDragRound4(f, 1);
-					setLista();
-					break;
-				}
-				case R.id.draground4chk22: {
-					c = dbLoader.fetchDragTop10(4, 2);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateDragRound4(f, 2);
-					setLista();
-					break;
-				}
-				case R.id.draground4chk32: {
-					c = dbLoader.fetchDragTop10(4, 3);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateDragRound4(f, 3);
-					setLista();
-					break;
-				}
-				case R.id.draground4chk42: {
-					c = dbLoader.fetchDragTop10(4, 4);
-					c.moveToNext();
-
-					f = new Finals(
-							c.getString(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Nev)),
-							c.getInt(c
-									.getColumnIndex(DbConstants.DragTop10.Key_Rajtszam)),
-							win2);
-
-					dbLoader.updateDragRound4(f, 4);
-					setLista();
-					break;
-				}
-
-				}
-				// setLista();
-			}
-
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(
+					DragTop10Fragment1.this.getActivity());
+			pDialog.setMessage("Versenyzõ eltárolása..");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
 		}
-	};
+
+		@Override
+		protected ToplistView doInBackground(ToplistView... param) {
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("rajt", Integer.toString(param[0]
+					.getNumber())));
+			params.add(new BasicNameValuePair("nev", param[0].getName()));
+			params.add(new BasicNameValuePair("nyert", Integer
+					.toString(param[0].getWin())));
+			params.add(new BasicNameValuePair("kor", Integer.toString(param[0]
+					.getRound())));
+
+			Log.d("elküldendõ:",
+					param[0].getName() + " " + param[0].getNumber() + " "
+							+ param[0].getWin() + " " + param[0].getRound());
+
+			// getting JSON Object
+			// Note that create product url accepts POST method
+			JSONObject json = jsonParser.makeHttpRequest(url_update_drag_top,
+					"POST", params);
+
+			// check log cat fro response
+			Log.d("Create Response", json.toString());
+
+			if (param[0].getWin() == 2) {
+				params = new ArrayList<NameValuePair>();
+				params.add(new BasicNameValuePair("rajt", Integer
+						.toString(param[0].getNumber())));
+				params.add(new BasicNameValuePair("nev", param[0].getName()));
+				params.add(new BasicNameValuePair("kor", Integer
+						.toString(param[0].getRound() + 1)));
+
+				if (param[0].getRound() == 1) {
+					if (param[0].getPid() == 8 || param[0].getPid() == 1) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(3)));
+					} else if (param[0].getPid() == 7 || param[0].getPid() == 2) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(2)));
+					} else if (param[0].getPid() == 6 || param[0].getPid() == 3) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(4)));
+					} else if (param[0].getPid() == 5 || param[0].getPid() == 4) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(1)));
+					}
+					json = jsonParser.makeHttpRequest(
+							url_update_next_drag_top, "POST", params);
+				} else if (param[0].getRound() == 2) {
+					if (param[0].getPid() == 1 || param[0].getPid() == 2) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(1)));
+					} else if (param[0].getPid() == 3 || param[0].getPid() == 4) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(4)));
+					}
+					json = jsonParser.makeHttpRequest(
+							url_update_next_drag_top, "POST", params);
+				} else if (param[0].getRound() == 3) {
+					if (param[0].getPid() == 1 || param[0].getPid() == 2) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(1)));
+						json = jsonParser.makeHttpRequest(
+								url_update_next_drag_top, "POST", params);
+						if (param[0].getPid() == 1) {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound32.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound32
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound32.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(3)));
+						} else {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound31.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound31
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound31.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(3)));
+						}
+						json = jsonParser.makeHttpRequest(
+								url_update_next_drag_top, "POST", params);
+					} else if (param[0].getPid() == 3 || param[0].getPid() == 4) {
+						params.add(new BasicNameValuePair("pid", Integer
+								.toString(2)));
+						json = jsonParser.makeHttpRequest(
+								url_update_next_drag_top, "POST", params);
+						if (param[0].getPid() == 3) {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound34.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound34
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound34.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(4)));
+						} else {
+							params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("rajt", Integer
+									.toString(tvRound33.getNumber())));
+							params.add(new BasicNameValuePair("nev", tvRound33
+									.getName()));
+							params.add(new BasicNameValuePair("kor", Integer
+									.toString(tvRound33.getRound() + 1)));
+							params.add(new BasicNameValuePair("pid", Integer
+									.toString(4)));
+						}
+						json = jsonParser.makeHttpRequest(
+								url_update_next_drag_top, "POST", params);
+					}
+				}
+				
+				Intent intent = new Intent("gyfrissit");
+				LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+
+				Log.d("Create Response", json.toString());
+			}
+
+			return param[0];
+		}
+
+		protected void onPostExecute(ToplistView nev) {
+			// dismiss the dialog once done
+			pDialog.dismiss();
+			if (nev.getWin() == 2) {
+				if (nev.getRound() == 1) {
+					if (nev.getPid() == 8 || nev.getPid() == 1) {
+						tvRound23.setNumber(nev.getNumber());
+						tvRound23.setPid(nev.getPid());
+						tvRound23.setName(nev.getName());
+					} else if (nev.getPid() == 7 || nev.getPid() == 2) {
+						tvRound22.setNumber(nev.getNumber());
+						tvRound22.setPid(nev.getPid());
+						tvRound22.setName(nev.getName());
+					} else if (nev.getPid() == 6 || nev.getPid() == 3) {
+						tvRound24.setNumber(nev.getNumber());
+						tvRound24.setPid(nev.getPid());
+						tvRound24.setName(nev.getName());
+					} else if (nev.getPid() == 5 || nev.getPid() == 4) {
+						tvRound21.setNumber(nev.getNumber());
+						tvRound21.setPid(nev.getPid());
+						tvRound21.setName(nev.getName());
+					}
+				} else if (nev.getRound() == 2) {
+					if (nev.getPid() == 1 || nev.getPid() == 2) {
+						tvRound31.setNumber(nev.getNumber());
+						tvRound31.setPid(nev.getPid());
+						tvRound31.setName(nev.getName());
+					} else if (nev.getPid() == 3 || nev.getPid() == 4) {
+						tvRound34.setNumber(nev.getNumber());
+						tvRound34.setPid(nev.getPid());
+						tvRound34.setName(nev.getName());
+					}
+				} else if (nev.getRound() == 3) {
+					if (nev.getPid() == 1 || nev.getPid() == 2) {
+						tvRound41.setNumber(nev.getNumber());
+						tvRound41.setPid(nev.getPid());
+						tvRound41.setName(nev.getName());
+						if (nev.getPid() == 1) {
+							tvRound43.setNumber(tvRound32.getNumber());
+							tvRound43.setPid(tvRound32.getPid());
+							tvRound43.setName(tvRound32.getName());
+						} else {
+							tvRound43.setNumber(tvRound31.getNumber());
+							tvRound43.setPid(tvRound31.getPid());
+							tvRound43.setName(tvRound31.getName());
+						}
+					} else if (nev.getPid() == 3 || nev.getPid() == 4) {
+						tvRound42.setNumber(nev.getNumber());
+						tvRound42.setPid(nev.getPid());
+						tvRound42.setName(nev.getName());
+						if (nev.getPid() == 4) {
+							tvRound44.setNumber(tvRound33.getNumber());
+							tvRound44.setPid(tvRound33.getPid());
+							tvRound44.setName(tvRound33.getName());
+						} else {
+							tvRound44.setNumber(tvRound34.getNumber());
+							tvRound44.setPid(tvRound34.getPid());
+							tvRound44.setName(tvRound34.getName());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	class GetList extends AsyncTask<String, String, String> {
+
+		boolean failed = false;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(
+					DragTop10Fragment1.this.getActivity());
+			pDialog.setMessage("Versenyzõ frissítése..");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... param) {
+			// Building Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			// getting JSON string from URL
+			JSONObject json = jsonParser.makeHttpRequest(url_get_drag_top,
+					"GET", params);
+
+			try {
+				// Checking for SUCCESS TAG
+				int success = json.getInt(TAG_SUCCESS);
+
+				if (success == 1) {
+					// products found
+					// Getting Array of Products
+					racers = json.getJSONArray(TAG_PRODUCTS);
+
+					Log.d("racers hossza:", Integer.toString(racers.length()));
+					// looping through All Products
+					for (int i = 0; i < racers.length(); i++) {
+						JSONObject c = racers.getJSONObject(i);
+
+						DragTop racer = new DragTop();
+
+						// Storing each json item in variable
+						racer.setNumber(Integer.parseInt(c.getString("rajt")));
+						racer.setName(c.getString("nev"));
+						racer.setWon(Integer.parseInt(c.getString("nyert")));
+						racer.setPid(Integer.parseInt(c.getString("pid")));
+
+						if (i < 8)
+							dragListr1.add(racer);
+						else if (i < 12)
+							dragListr2.add(racer);
+						else if (i < 16)
+							dragListr3.add(racer);
+						else if (i < 20)
+							dragListr4.add(racer);
+					}
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				failed = true;
+				e.printStackTrace();
+			}
+
+			return null;
+		}
+
+		protected void onPostExecute(String file_url) {
+
+			pDialog.dismiss();
+
+			if (failed) {
+				Toast.makeText(
+						DragTop10Fragment1.this.getActivity(),
+						"Sikertelen lekérés\n, ellenõrizd az internetkapcsolatot.",
+						Toast.LENGTH_LONG).show();
+			} else {
+				tvRound11.setData(dragListr1.get(4).getName(), dragListr1
+						.get(4).getNumber(), dragListr1.get(4).getWon(),
+						dragListr1.get(4).getPid());
+				Log.d("1round", tvRound11.getName() + " " + tvRound11.getPid());
+				tvRound12.setData(dragListr1.get(3).getName(), dragListr1
+						.get(3).getNumber(), dragListr1.get(3).getWon(),
+						dragListr1.get(3).getPid());
+				Log.d("1round", tvRound12.getName() + " " + tvRound12.getPid());
+				tvRound13.setData(dragListr1.get(1).getName(), dragListr1
+						.get(1).getNumber(), dragListr1.get(1).getWon(),
+						dragListr1.get(1).getPid());
+				Log.d("1round", tvRound13.getName() + " " + tvRound13.getPid());
+				tvRound14.setData(dragListr1.get(6).getName(), dragListr1
+						.get(6).getNumber(), dragListr1.get(6).getWon(),
+						dragListr1.get(6).getPid());
+				Log.d("1round", tvRound14.getName() + " " + tvRound14.getPid());
+				tvRound15.setData(dragListr1.get(7).getName(), dragListr1
+						.get(7).getNumber(), dragListr1.get(7).getWon(),
+						dragListr1.get(7).getPid());
+				Log.d("1round", tvRound15.getName() + " " + tvRound15.getPid());
+				tvRound16.setData(dragListr1.get(0).getName(), dragListr1
+						.get(0).getNumber(), dragListr1.get(0).getWon(),
+						dragListr1.get(0).getPid());
+				Log.d("1round", tvRound16.getName() + " " + tvRound16.getPid());
+				tvRound17.setData(dragListr1.get(2).getName(), dragListr1
+						.get(2).getNumber(), dragListr1.get(2).getWon(),
+						dragListr1.get(2).getPid());
+				Log.d("1round", tvRound17.getName() + " " + tvRound17.getPid());
+				tvRound18.setData(dragListr1.get(5).getName(), dragListr1
+						.get(5).getNumber(), dragListr1.get(5).getWon(),
+						dragListr1.get(5).getPid());
+				Log.d("1round", tvRound18.getName() + " " + tvRound18.getPid());
+
+				tvRound21.setData(dragListr2.get(0).getName(), dragListr2
+						.get(0).getNumber(), dragListr2.get(0).getWon(),
+						dragListr2.get(0).getPid());
+				tvRound22.setData(dragListr2.get(1).getName(), dragListr2
+						.get(1).getNumber(), dragListr2.get(1).getWon(),
+						dragListr2.get(1).getPid());
+				tvRound23.setData(dragListr2.get(2).getName(), dragListr2
+						.get(2).getNumber(), dragListr2.get(2).getWon(),
+						dragListr2.get(2).getPid());
+				tvRound24.setData(dragListr2.get(3).getName(), dragListr2
+						.get(3).getNumber(), dragListr2.get(3).getWon(),
+						dragListr2.get(3).getPid());
+
+				tvRound31.setData(dragListr3.get(0).getName(), dragListr3
+						.get(0).getNumber(), dragListr3.get(0).getWon(),
+						dragListr3.get(0).getPid());
+				tvRound32.setData(dragListr3.get(1).getName(), dragListr3
+						.get(1).getNumber(), dragListr3.get(1).getWon(),
+						dragListr3.get(1).getPid());
+				tvRound33.setData(dragListr3.get(2).getName(), dragListr3
+						.get(2).getNumber(), dragListr3.get(2).getWon(),
+						dragListr3.get(2).getPid());
+				tvRound34.setData(dragListr3.get(3).getName(), dragListr3
+						.get(3).getNumber(), dragListr3.get(3).getWon(),
+						dragListr3.get(3).getPid());
+
+				tvRound41.setData(dragListr4.get(0).getName(), dragListr4
+						.get(0).getNumber(), dragListr4.get(0).getWon(),
+						dragListr4.get(0).getPid());
+				tvRound42.setData(dragListr4.get(1).getName(), dragListr4
+						.get(1).getNumber(), dragListr4.get(1).getWon(),
+						dragListr4.get(1).getPid());
+				tvRound43.setData(dragListr4.get(2).getName(), dragListr4
+						.get(2).getNumber(), dragListr4.get(2).getWon(),
+						dragListr4.get(2).getPid());
+				tvRound44.setData(dragListr4.get(3).getName(), dragListr4
+						.get(3).getNumber(), dragListr4.get(3).getWon(),
+						dragListr4.get(3).getPid());
+			}
+		}
+	}
 }

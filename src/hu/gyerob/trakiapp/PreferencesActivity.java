@@ -8,6 +8,7 @@ import application.App;
 
 public class PreferencesActivity extends PreferenceActivity {
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

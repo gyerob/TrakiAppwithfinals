@@ -7,20 +7,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import datastorage.DbLoader;
 
 public class App extends Application {
-	private static DbLoader dbLoader;
 
 	private static String SERVER_IP = "gyerob.no-ip.biz";
-	private static int SERVERPORT = 8080;
-	private static boolean dragloaded = false;
-	private static boolean slalomloaded = false;
-
-	public static DbLoader getDbLoader() {
-		return dbLoader;
-	}
-
+	private static int SERVERPORT = 80;
 	public static int getPort() {
 		return SERVERPORT;
 	}
@@ -51,33 +42,6 @@ public class App extends Application {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
 		setServer(prefs.getString("editTextIP", "gyerob.no-ip.biz"),
-				Integer.parseInt(prefs.getString("editTextPort", "8080")));
-		dbLoader = new DbLoader(this);
-		dbLoader.open();
-		dbLoader.loadImages();
-	}
-
-	@Override
-	public void onTerminate() {
-		// Close the internal db
-		dbLoader.close();
-
-		super.onTerminate();
-	}
-
-	public static boolean isSlalomloaded() {
-		return slalomloaded;
-	}
-
-	public static void setSlalomloaded(boolean slalomloaded) {
-		App.slalomloaded = slalomloaded;
-	}
-
-	public static boolean isDragloaded() {
-		return dragloaded;
-	}
-
-	public static void setDragloaded(boolean dragloaded) {
-		App.dragloaded = dragloaded;
+				Integer.parseInt(prefs.getString("editTextPort", "80")));
 	}
 }

@@ -100,7 +100,7 @@ public class DragFragment extends ListFragment {
 						drag.setName(c.getString("nev"));
 						drag.setIdo1(c.getString("ido1"));
 						drag.setIdo2(c.getString("ido2"));
-						drag.setLido(c.getString("lido"));
+						drag.setLegjobbIdo(c.getString("lido"));
 
 						dragList.add(drag);
 					}

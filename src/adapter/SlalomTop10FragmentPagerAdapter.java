@@ -11,7 +11,7 @@ public class SlalomTop10FragmentPagerAdapter extends FragmentPagerAdapter {
 	private SlalomTop10Fragment1 f1;
 	private SlalomTop10Fragment2 f2;
 
-	public SlalomTop10FragmentPagerAdapter(FragmentManager fm ,boolean veg) {
+	public SlalomTop10FragmentPagerAdapter(FragmentManager fm) {
 		super(fm);
 		f1 = new SlalomTop10Fragment1();
 		f2 = new SlalomTop10Fragment2();
