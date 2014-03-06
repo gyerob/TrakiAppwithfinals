@@ -31,7 +31,7 @@ public class RacerFragment extends ListFragment {
 
 	public ProgressDialog pDialog;
 
-	private JSONParser jParser = new JSONParser();
+	private JSONParser jsonParser = new JSONParser();
 
 	private static String url_all_racer = "http://gyerob.no-ip.biz/trakiweb/get_all_racer.php";
 
@@ -80,7 +80,7 @@ public class RacerFragment extends ListFragment {
 			// Building Parameters
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			// getting JSON string from URL
-			JSONObject json = jParser.makeHttpRequest(url_all_racer, "GET",
+			JSONObject json = jsonParser.makeHttpRequest(url_all_racer, "GET",
 					params);
 
 			try {

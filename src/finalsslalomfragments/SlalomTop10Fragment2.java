@@ -22,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,8 @@ public class SlalomTop10Fragment2 extends ListFragment {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			new LoadAllRacer().execute();
+			Log.d("broadcast", "elkapva");
+			adapter.notifyDataSetChanged();
 		}
 	}
 	
@@ -56,10 +59,8 @@ public class SlalomTop10Fragment2 extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		racerList = new ArrayList<SlalomTop>();
-		
 		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-				new updatebroadcast(), new IntentFilter("gyfrissit"));
+				new updatebroadcast(), new IntentFilter("szfrissit"));
 		
 		new LoadAllRacer().execute();
 	}
@@ -107,6 +108,8 @@ public class SlalomTop10Fragment2 extends ListFragment {
 					// products found
 					// Getting Array of Products
 					racers = json.getJSONArray(TAG_PRODUCTS);
+					
+					racerList = new ArrayList<SlalomTop>();
 
 					// looping through All Products
 					for (int i = 0; i < racers.length(); i++) {

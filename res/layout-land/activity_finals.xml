@@ -31,23 +31,6 @@
         android:layout_alignParentRight="true"
         android:text="Gyorsulás" />
 
-    <CheckBox
-        android:id="@+id/checkslalomend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/finalsSlalombtn"
-        android:text="Lezajlott" />
-
-    <CheckBox
-        android:id="@+id/checkdragend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/checkslalomend"
-        android:layout_alignBottom="@+id/checkslalomend"
-        android:layout_alignParentRight="true"
-        android:text="Lezajlott" />
-
     <Button
         android:id="@+id/btnlockslalom"
         android:layout_width="wrap_content"

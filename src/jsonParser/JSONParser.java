@@ -11,6 +11,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -52,6 +53,24 @@ public class JSONParser {
 				HttpEntity httpEntity = httpResponse.getEntity();
 				is = httpEntity.getContent();
 
+			} if (method == "POSTIMG") {
+				// request method is POST
+				// defaultHttpClient
+				HttpClient httpClient = new DefaultHttpClient();
+				HttpPost httpPost = new HttpPost(url);
+				httpPost.setEntity(new UrlEncodedFormEntity(params, "utf-8"));
+
+				HttpResponse httpResponse = httpClient.execute(httpPost);
+				HttpEntity httpEntity = httpResponse.getEntity();
+				is = httpEntity.getContent();
+				/*json = EntityUtils.toString(httpEntity);
+				try {
+					jObj = new JSONObject(json);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return jObj;*/
 			} else if (method == "GET") {
 				// request method is GET
 				DefaultHttpClient httpClient = new DefaultHttpClient();

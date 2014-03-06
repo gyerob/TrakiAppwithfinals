@@ -36,7 +36,7 @@ public class RacerFragment extends Fragment {
 	// Progress Dialog
 	private ProgressDialog pDialog;
 
-	JSONParser jsonParser = new JSONParser();
+	private JSONParser jsonParser = new JSONParser();
 
 	private Button save;
 	private Button delete;

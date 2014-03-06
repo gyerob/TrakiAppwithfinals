@@ -49,14 +49,13 @@ public class DragTop10Fragment2 extends ListFragment {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			new LoadAllRacer().execute();
+			adapter.notifyDataSetChanged();
 		}
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		racerList = new ArrayList<DragTop>();
 
 		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
 				new updatebroadcast(), new IntentFilter("gyfrissit"));
@@ -107,6 +106,8 @@ public class DragTop10Fragment2 extends ListFragment {
 					// products found
 					// Getting Array of Products
 					racers = json.getJSONArray(TAG_PRODUCTS);
+
+					racerList = new ArrayList<DragTop>();
 
 					// looping through All Products
 					for (int i = 0; i < racers.length(); i++) {

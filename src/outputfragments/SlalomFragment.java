@@ -31,7 +31,7 @@ public class SlalomFragment extends ListFragment {
 
 	public ProgressDialog pDialog;
 
-	JSONParser jParser = new JSONParser();
+	JSONParser jsonParser = new JSONParser();
 
 	private static String url_all_slalom = "http://gyerob.no-ip.biz/trakiweb/get_all_slalom.php";
 
@@ -77,7 +77,7 @@ public class SlalomFragment extends ListFragment {
 			// Building Parameters
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			// getting JSON string from URL
-			JSONObject json = jParser.makeHttpRequest(url_all_slalom, "GET",
+			JSONObject json = jsonParser.makeHttpRequest(url_all_slalom, "GET",
 					params);
 
 			try {

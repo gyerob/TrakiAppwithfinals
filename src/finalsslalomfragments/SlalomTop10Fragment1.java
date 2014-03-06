@@ -306,7 +306,9 @@ public class SlalomTop10Fragment1 extends Fragment implements IListViewUpdate {
 				}
 
 				Intent intent = new Intent("szfrissit");
-				LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+				if(LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent)) {
+					Log.d("broadcast", "elküldve");
+				}
 				
 				Log.d("Create Response", json.toString());
 			}

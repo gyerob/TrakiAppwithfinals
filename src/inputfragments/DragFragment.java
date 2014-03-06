@@ -91,18 +91,22 @@ public class DragFragment extends Fragment {
 			String time = "harr";
 
 			int mperc, kor;
-			String mmp;
+			String s, ezred;
 			
 			if(firstround.isChecked()) kor = 1;
 			else kor = 2;
 			
 			mperc = Integer.parseInt(mp.getText().toString());
-			mmp = ms.getText().toString();
+			ezred = ms.getText().toString();
+			
+			if(ezred.length() == 0) ezred = "000";
+			else if (ezred.length() == 1) ezred = ezred + "00";
+			else if (ezred.length() == 2) ezred = ezred + "0";
 
-			if (mperc < 10)
-				time = "0" + mperc + ":" + mmp;
-			else
-				time = mperc + ":" + mmp;
+			if(mperc<10) s = "0" + mperc;
+			else s = Integer.toString(mperc);
+			
+			time = s +":" + ezred;
 			Log.d("ido", time);
 
 			// Building Parameters
