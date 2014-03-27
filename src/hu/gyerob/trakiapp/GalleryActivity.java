@@ -42,6 +42,8 @@ public class GalleryActivity extends Activity {
 	private static final String TAG_SUCCESS = "success";
 	private static final String TAG_PRODUCTS = "images";
 
+	private boolean webview = true;
+
 	private JSONParser jsonParser = new JSONParser();;
 	// Progress Dialog
 	private ProgressDialog pDialog;
@@ -56,11 +58,19 @@ public class GalleryActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gallery);
-		
+
+		/*
+		 * webView = (WebView) findViewById(R.id.webView1); +
+		 * webView.setWebViewClient(new WebViewClient()); +
+		 * webView.getSettings().setJavaScriptEnabled(true); +
+		 * webView.loadUrl("httP://gyerob.no-ip.biz/trakiweb/pics");
+		 */
+
 		picturenames = new ArrayList<String>();
-		
+
 		gridView = (GridView) findViewById(R.id.gridview);
-		gridAdapter = new GridViewAdapter(GalleryActivity.this, R.layout.row_grid, picturenames);
+		gridAdapter = new GridViewAdapter(GalleryActivity.this,
+				R.layout.row_grid, picturenames);
 		gridView.setAdapter(gridAdapter);
 
 		iv = (ImageView) findViewById(R.id.galleryiv);
@@ -71,9 +81,13 @@ public class GalleryActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
+				Bitmap bm = ((GridViewAdapter) gridView.getAdapter())
+						.getBitmap(position);
+				if (bm != null)
+					iv.setImageBitmap(bm);
 			}
 		});
-		
+
 		new GetImages().execute();
 	}
 
@@ -84,8 +98,8 @@ public class GalleryActivity extends Activity {
 			// Building Parameters
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			// getting JSON string from URL
-			JSONObject json = jsonParser.makeHttpRequest(url_get_all_image, "GET",
-					params);
+			JSONObject json = jsonParser.makeHttpRequest(url_get_all_image,
+					"GET", params);
 
 			picturenames = new ArrayList<String>();
 
@@ -104,7 +118,7 @@ public class GalleryActivity extends Activity {
 
 						// Storing each json item in variable
 						String nev = c.getString("nev");
-						
+
 						picturenames.add(nev);
 					}
 				}
@@ -119,7 +133,7 @@ public class GalleryActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			
+
 			gridAdapter.clear();
 			gridAdapter.addAll(picturenames);
 			gridAdapter.notifyDataSetChanged();
@@ -213,6 +227,9 @@ public class GalleryActivity extends Activity {
 			startActivityForResult(
 					Intent.createChooser(photoPickerIntent, "SELECT PICTURE"),
 					1);
+		}
+		if (item.getItemId() == R.id.switchgalleryview) {
+
 		}
 		return super.onOptionsItemSelected(item);
 	}

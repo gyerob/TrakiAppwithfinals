@@ -1,5 +1,6 @@
 package adapter;
 
+import gallery.ImageItem;
 import hu.gyerob.trakiapp.R;
 
 import java.io.IOException;
@@ -23,17 +24,20 @@ import android.widget.TextView;
 public class GridViewAdapter extends ArrayAdapter<String> {
 	private Context context;
 	private int layoutResourceId;
-	private ArrayList<String> data = new ArrayList<String>();
-	private static String url_img_folder = "http://gyerob.no-ip.biz/trakiweb/pics/";
+	private ArrayList<String> picnames = new ArrayList<String>();
+	private ArrayList<ImageItem> pictures = new ArrayList<ImageItem>();
+	private static String url_img_folder = "http://gyerob.no-ip.biz/trakiweb/pics/gallery-images/";
 
 	public GridViewAdapter(Context context, int layoutResourceId,
 			ArrayList<String> picturenames) {
 		super(context, layoutResourceId, picturenames);
 		this.layoutResourceId = layoutResourceId;
 		this.context = context;
-		this.data = picturenames;
-
-		System.out.println(picturenames.size() + " " + this.data.size());
+		this.picnames = picturenames;
+	}
+	
+	public Bitmap getBitmap(int i) {
+		return pictures.get(i).getImage();
 	}
 
 	@Override
@@ -41,8 +45,6 @@ public class GridViewAdapter extends ArrayAdapter<String> {
 		View row = convertView;
 		ViewHolder holder = null;
 
-		System.out.println("data mérete" + data.size());
-		
 		if (row == null) {
 			LayoutInflater inflater = ((Activity) context).getLayoutInflater();
 			row = inflater.inflate(layoutResourceId, parent, false);
@@ -53,9 +55,9 @@ public class GridViewAdapter extends ArrayAdapter<String> {
 			holder = (ViewHolder) row.getTag();
 		}
 
-		if (data != null) {
+		if (picnames != null) {
 			System.out.println("elem lekérdezése ha nem üres a lista");
-			String item = data.get(position);
+			String item = picnames.get(position);
 			if (holder.image != null) {
 				System.out.println("getimage elõtt");
 				new GetImage(holder.image).execute(item);
@@ -75,27 +77,65 @@ public class GridViewAdapter extends ArrayAdapter<String> {
 
 		public GetImage(ImageView iv) {
 			this.iv = new WeakReference<ImageView>(iv);
-			System.out.println("getimage konstruktor");
 		}
 
 		@Override
 		protected Bitmap doInBackground(String... params) {
 			Bitmap bm = null;
+			ImageItem ie = null;
+			int i = 0;
 			for (String param : params) {
-				String urlstring = url_img_folder + param;
-				System.out.println(urlstring);
-				URL url;
-				try {
-					url = new URL(urlstring);
-					bm = BitmapFactory.decodeStream(url.openConnection()
-							.getInputStream());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
+
+				for (ImageItem iitem : pictures) {
+					if (iitem.getTitle().equals(param)) {
+						ie = iitem;
+						break;
+					}
+					i++;
+				}
+
+				if (ie != null) {
+					if (ie.getImage() != null) {
+						return ie.getImage();
+					} else {
+						String urlstring = url_img_folder + param;
+						System.out.println(urlstring);
+						URL url;
+						try {
+							url = new URL(urlstring);
+							bm = BitmapFactory.decodeStream(url
+									.openConnection().getInputStream());
+						} catch (MalformedURLException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						ie.setImage(bm);
+						pictures.remove(i);
+						pictures.add(i, ie);
+						return ie.getImage();
+					}
+				} else {
+					ie = new ImageItem();
+					ie.setTitle(param);
+					String urlstring = url_img_folder + param;
+					System.out.println(urlstring);
+					URL url;
+					try {
+						url = new URL(urlstring);
+						bm = BitmapFactory.decodeStream(url.openConnection()
+								.getInputStream());
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					ie.setImage(bm);
+					pictures.add(ie);
+					return bm;
 				}
 			}
-			return bm;
+			return null;
 		}
 
 		@Override

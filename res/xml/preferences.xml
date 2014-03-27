@@ -8,13 +8,18 @@
             android:key="editTextIP"
             android:summary="Ide csatlakozik"
             android:title="IP" />
-        
         <EditTextPreference
             android:name="Port"
             android:defaultValue="8080"
             android:key="editTextPort"
             android:summary="Ezen a porton"
             android:title="Port" />
+
+        <ListPreference
+            android:entries="@array/GalleryView"
+            android:entryValues="@array/GalleryViewValues"
+            android:key="galleryswitch"
+            android:title="Galéria" />
     </PreferenceCategory>
 
 </PreferenceScreen>

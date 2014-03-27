@@ -8,7 +8,8 @@ public class ImageItem {
 	private int rowid;
 
 	public ImageItem() {
-		
+		image = null;
+		title = null;
 	}
 	
 	public ImageItem(int rowid) {
