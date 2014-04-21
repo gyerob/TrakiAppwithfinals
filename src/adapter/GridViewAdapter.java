@@ -35,9 +35,12 @@ public class GridViewAdapter extends ArrayAdapter<String> {
 		this.context = context;
 		this.picnames = picturenames;
 	}
-	
+
 	public Bitmap getBitmap(int i) {
-		return pictures.get(i).getImage();
+		if (i >= pictures.size())
+			return null;
+		else
+			return pictures.get(i).getImage();
 	}
 
 	@Override
@@ -74,6 +77,7 @@ public class GridViewAdapter extends ArrayAdapter<String> {
 	public class GetImage extends AsyncTask<String, Void, Bitmap> {
 
 		private WeakReference<ImageView> iv;
+		private Bitmap bm;
 
 		public GetImage(ImageView iv) {
 			this.iv = new WeakReference<ImageView>(iv);
@@ -81,7 +85,7 @@ public class GridViewAdapter extends ArrayAdapter<String> {
 
 		@Override
 		protected Bitmap doInBackground(String... params) {
-			Bitmap bm = null;
+			bm = null;
 			ImageItem ie = null;
 			int i = 0;
 			for (String param : params) {

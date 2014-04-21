@@ -4,8 +4,5 @@
     <item
         android:id="@+id/itemPreferences"
         android:title="@string/itemPreferences"/>
-    <item 
-        android:id="@+id/itemUpdate"
-        android:title="@string/update"/>
 
 </menu>

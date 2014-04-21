@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.PorterDuff.Mode;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -62,31 +64,24 @@ public class MainActivity extends Activity {
 		output.setOnClickListener(startlistener);
 		finals.setOnClickListener(startlistener);
 		gallery.setOnClickListener(startlistener);
-		
-		
+
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Intent settingsActivity = new Intent(this,
-				PreferencesActivity.class);
-		startActivity(settingsActivity);
-		//MenuInflater inflater = getMenuInflater();
-		//inflater.inflate(R.menu.mymenu, menu);
+		super.onCreateOptionsMenu(menu);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.mymenu, menu);
 		return true;
 	}
-/*
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.itemPreferences) {
-			Intent settingsActivity = new Intent(this,
+			Intent settingsActivity = new Intent(MainActivity.this,
 					PreferencesActivity.class);
 			startActivity(settingsActivity);
 		}
-		if (item.getItemId() == R.id.itemUpdate) {
-			
-		}
 		return super.onOptionsItemSelected(item);
 	}
-	*/
 }

@@ -1,5 +1,8 @@
 package hu.gyerob.trakiapp;
 
+import gallery.GridFragment;
+import gallery.WebFragment;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,134 +13,61 @@ import jsonParser.JSONParser;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import adapter.GridViewAdapter;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.GridView;
-import android.widget.ImageView;
+import android.widget.Toast;
 
-public class GalleryActivity extends Activity {
+public class GalleryActivity extends FragmentActivity {
 
 	// private static final int SELECT_PHOTO = 100;
 	private static String url_upload_img = "http://gyerob.no-ip.biz/trakiweb/img_up.php";
-	private static String url_get_all_image = "http://gyerob.no-ip.biz/trakiweb/get_all_image.php";
-	private static final String TAG_SUCCESS = "success";
-	private static final String TAG_PRODUCTS = "images";
-
-	private boolean webview = true;
-
-	private JSONParser jsonParser = new JSONParser();;
+	private JSONParser jsonParser = new JSONParser();
+	
 	// Progress Dialog
 	private ProgressDialog pDialog;
+	
+	private SharedPreferences prefs;
+	private String nezet;
+	
+	private Fragment fragment;
 
-	private ImageView iv;
-	private GridView gridView;
-	private GridViewAdapter gridAdapter;
-	private ArrayList<String> picturenames;
-	private JSONArray images = null;
-
+	//private ImageView iv;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+
+		prefs = PreferenceManager
+				.getDefaultSharedPreferences(getBaseContext());
+		nezet = prefs.getString("galleryswitch", "Grid");
+		Toast.makeText(this, nezet, Toast.LENGTH_LONG).show();
+		
 		setContentView(R.layout.activity_gallery);
-
-		/*
-		 * webView = (WebView) findViewById(R.id.webView1); +
-		 * webView.setWebViewClient(new WebViewClient()); +
-		 * webView.getSettings().setJavaScriptEnabled(true); +
-		 * webView.loadUrl("httP://gyerob.no-ip.biz/trakiweb/pics");
-		 */
-
-		picturenames = new ArrayList<String>();
-
-		gridView = (GridView) findViewById(R.id.gridview);
-		gridAdapter = new GridViewAdapter(GalleryActivity.this,
-				R.layout.row_grid, picturenames);
-		gridView.setAdapter(gridAdapter);
-
-		iv = (ImageView) findViewById(R.id.galleryiv);
-		iv.setImageDrawable(getResources().getDrawable(R.drawable.icon));
-
-		gridView.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id) {
-				Bitmap bm = ((GridViewAdapter) gridView.getAdapter())
-						.getBitmap(position);
-				if (bm != null)
-					iv.setImageBitmap(bm);
-			}
-		});
-
-		new GetImages().execute();
-	}
-
-	public class GetImages extends AsyncTask<Void, Void, Void> {
-
-		@Override
-		protected Void doInBackground(Void... param) {
-			// Building Parameters
-			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			// getting JSON string from URL
-			JSONObject json = jsonParser.makeHttpRequest(url_get_all_image,
-					"GET", params);
-
-			picturenames = new ArrayList<String>();
-
-			try {
-				// Checking for SUCCESS TAG
-				int success = json.getInt(TAG_SUCCESS);
-
-				if (success == 1) {
-					// products found
-					// Getting Array of Products
-					images = json.getJSONArray(TAG_PRODUCTS);
-
-					// looping through All Products
-					for (int i = 0; i < images.length(); i++) {
-						JSONObject c = images.getJSONObject(i);
-
-						// Storing each json item in variable
-						String nev = c.getString("nev");
-
-						picturenames.add(nev);
-					}
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-
-			gridAdapter.clear();
-			gridAdapter.addAll(picturenames);
-			gridAdapter.notifyDataSetChanged();
-		}
+		
+		FragmentManager fm = getSupportFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+		if (nezet.equals("Grid")) fragment = new GridFragment();
+		else fragment = new WebFragment();
+		ft.add(R.id.FragmentContainer, fragment);
+		ft.commit();
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode,
@@ -206,7 +136,7 @@ public class GalleryActivity extends Activity {
 		@Override
 		protected void onPostExecute(Bitmap result) {
 			super.onPostExecute(result);
-			iv.setImageBitmap(result);
+			//iv.setImageBitmap(result);
 			// dismiss the dialog once done
 			pDialog.dismiss();
 		}
@@ -229,7 +159,21 @@ public class GalleryActivity extends Activity {
 					1);
 		}
 		if (item.getItemId() == R.id.switchgalleryview) {
-
+			if (nezet.equals("Grid")) {
+				prefs.edit().putString("galleryswitch", "Web").commit();
+				nezet = "Web";
+			}
+			else {
+				prefs.edit().putString("galleryswitch", "Grid").commit();
+				nezet = "Grid";
+			}
+			
+			FragmentManager fm = getSupportFragmentManager();
+			FragmentTransaction ft = fm.beginTransaction();
+			if (nezet.equals("Grid")) fragment = new GridFragment();
+			else fragment = new WebFragment();
+			ft.replace(R.id.FragmentContainer, fragment);
+			ft.commit();
 		}
 		return super.onOptionsItemSelected(item);
 	}
